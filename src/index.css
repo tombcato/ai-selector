@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   基础样式
+   ============================================ */
+
+:root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 亮色模式默认样式 */
+:root {
+  color-scheme: light;
+  color: #1a1a1a;
+  background-color: #fafafa;
+}
+
+/* 暗色模式样式 */
+.dark {
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #09090b;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-y: scroll;
+}
+
+/* ============================================
+   柔和阴影 (Soft shadows)
+   ============================================ */
+
+.shadow-soft {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 0.05),
+    0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.shadow-soft-md {
+  box-shadow:
+    0 2px 4px -1px rgb(0 0 0 / 0.06),
+    0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.shadow-soft-lg {
+  box-shadow:
+    0 4px 6px -2px rgb(0 0 0 / 0.05),
+    0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* 暗色模式阴影 */
+.dark .shadow-soft {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 0.3),
+    0 1px 3px 0 rgb(0 0 0 / 0.4);
+}
+
+.dark .shadow-soft-md {
+  box-shadow:
+    0 2px 4px -1px rgb(0 0 0 / 0.4),
+    0 4px 6px -1px rgb(0 0 0 / 0.5);
+}
+
+.dark .shadow-soft-lg {
+  box-shadow:
+    0 4px 6px -2px rgb(0 0 0 / 0.4),
+    0 10px 15px -3px rgb(0 0 0 / 0.5);
+}
+
+/* ============================================
+   自定义滚动条
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* 暗色模式滚动条 */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

@@ -1,0 +1,36 @@
+{
+    "name": "@ai-selector/core",
+    "version": "0.1.0",
+    "description": "Framework-agnostic AI Provider Selector core utilities",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.0"
+    },
+    "keywords": [
+        "ai",
+        "provider",
+        "openai",
+        "anthropic",
+        "gemini",
+        "deepseek",
+        "selector"
+    ],
+    "license": "MIT"
+}

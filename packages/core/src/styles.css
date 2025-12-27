@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+
+    /* 按钮 */
+    .ai-btn {
+        @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 h-10 px-4 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .ai-btn-primary {
+        @apply bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90;
+    }
+
+    .ai-btn-success {
+        @apply bg-green-600 text-white hover:bg-green-700;
+    }
+
+    .ai-btn-ghost {
+        @apply bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300;
+    }
+
+    /* 输入框 */
+    .ai-input {
+        @apply flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-gray-500 dark:placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 transition-colors;
+    }
+
+    .ai-input-default {
+        @apply border-gray-200 dark:border-zinc-800 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600;
+    }
+
+    .ai-input-error {
+        @apply border-red-500 dark:border-red-400 focus-visible:ring-red-500;
+    }
+
+    .ai-input-success {
+        @apply border-green-500 dark:border-green-600 focus-visible:ring-green-500;
+    }
+
+    /* 下拉框 */
+    .ai-select-trigger {
+        @apply flex h-9 w-full min-w-0 items-center justify-between whitespace-nowrap rounded-md border border-gray-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600;
+    }
+
+    .ai-dropdown {
+        @apply absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg;
+    }
+
+    .ai-dropdown-item {
+        @apply w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer;
+    }
+
+    .ai-dropdown-item-active {
+        @apply bg-zinc-100 dark:bg-zinc-800;
+    }
+
+    /* 标签 */
+    .ai-label {
+        @apply text-sm font-medium leading-none;
+    }
+
+    /* 文本 */
+    .ai-error-text {
+        @apply text-xs text-red-500 dark:text-red-400;
+    }
+
+    .ai-hint-text {
+        @apply text-xs text-gray-400 dark:text-zinc-500;
+    }
+
+    .ai-success-text {
+        @apply text-xs text-green-600 dark:text-green-400;
+    }
+
+    /* 卡片 */
+    .ai-card {
+        @apply bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-5 space-y-4;
+    }
+
+    /* 图标 */
+    .ai-icon-spin {
+        @apply w-4 h-4 animate-spin text-gray-400;
+    }
+
+    .ai-icon-success {
+        @apply w-4 h-4 text-green-500;
+    }
+
+    .ai-icon-error {
+        @apply w-4 h-4 text-red-500;
+    }
+
+    /* Provider 图标 - dark mode 反转 */
+    .ai-provider-icon {
+        @apply w-4 h-4 flex-shrink-0;
+    }
+}
+
+/* Dark mode 下 provider 图标反转颜色 */
+.dark .ai-provider-icon {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(82, 82, 91, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(82, 82, 91, 0.8);
+}
+
+/* 下拉框滚动条 */
+.ai-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 3px;
+}
+
+.dark .ai-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(82, 82, 91, 0.5);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

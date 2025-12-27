@@ -1,0 +1,28 @@
+{
+    "name": "@ai-selector/vue",
+    "version": "0.1.0",
+    "description": "Vue adapter for AI Provider Selector",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "peerDependencies": {
+        "vue": "^3.0.0"
+    },
+    "dependencies": {
+        "@ai-selector/core": "workspace:*"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^6.0.3",
+        "autoprefixer": "^10.4.23",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^3.4.19",
+        "typescript": "^5.3.0",
+        "vite": "^6.4.1",
+        "vue": "^3.3.0"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "vite"
+    }
+}

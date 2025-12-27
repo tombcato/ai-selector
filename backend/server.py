@@ -21,7 +21,14 @@ app = FastAPI(title="AI Provider Proxy", version="1.0.0")
 # CORS 配置 - 允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",  # Vue Demo
+        "http://127.0.0.1:5174",
+        "http://localhost:5175",  # Vue Demo (backup port)
+        "http://127.0.0.1:5175",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

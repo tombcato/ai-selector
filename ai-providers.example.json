@@ -1,0 +1,32 @@
+{
+    "$schema": "./ai-providers.schema.json",
+    "mode": "default",
+    "include": [
+        "openai",
+        "anthropic",
+        "gemini",
+        "deepseek",
+        "groq"
+    ],
+    "custom": {
+        "ollama-local": {
+            "name": "Ollama (本地)",
+            "baseUrl": "http://localhost:11434/v1",
+            "authType": "none",
+            "apiFormat": "openai",
+            "supportsModelsApi": true
+        },
+        "lmstudio": {
+            "name": "LM Studio",
+            "baseUrl": "http://localhost:1234/v1",
+            "authType": "none",
+            "apiFormat": "openai",
+            "models": [
+                {
+                    "id": "local-model",
+                    "name": "本地模型"
+                }
+            ]
+        }
+    }
+}

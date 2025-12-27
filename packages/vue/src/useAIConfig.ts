@@ -15,6 +15,8 @@ export interface UseAIConfigOptions {
     proxyUrl?: string;
     initialConfig?: Partial<AIConfig>;
     providerConfig?: ProviderConfig;
+    onSerialize?: (data: any) => string;
+    onDeserialize?: (data: string) => any;
 }
 
 export function useAIConfig(options: UseAIConfigOptions = {}) {
@@ -35,7 +37,10 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         allProviders.value.find(p => p.id === providerId.value) || null
     );
 
-    const storage = createConfigStorage();
+    const storage = createConfigStorage(undefined, {
+        serialize: options.onSerialize,
+        deserialize: options.onDeserialize
+    });
 
     // Flag to prevent clearing data during initial load
     const isLoaded = ref(false);

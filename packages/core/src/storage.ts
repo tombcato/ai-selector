@@ -28,13 +28,29 @@ export const localStorageAdapter: StorageAdapter = {
 /**
  * Create a config storage instance
  */
-export function createConfigStorage(adapter: StorageAdapter = localStorageAdapter) {
+export interface StorageOptions {
+    serialize?: (data: any) => string;
+    deserialize?: (data: string) => any;
+}
+
+export function createConfigStorage(
+    adapter: StorageAdapter = localStorageAdapter,
+    options: StorageOptions = {}
+) {
+    const serialize = options.serialize || JSON.stringify;
+    const deserialize = options.deserialize || JSON.parse;
+
     return {
         /**
          * Save AI config
          */
         save(config: AIConfig): void {
-            adapter.set(STORAGE_KEY, JSON.stringify(config));
+            try {
+                const serialized = serialize(config);
+                adapter.set(STORAGE_KEY, serialized);
+            } catch (e) {
+                console.error('Failed to save config:', e);
+            }
         },
 
         /**
@@ -44,8 +60,9 @@ export function createConfigStorage(adapter: StorageAdapter = localStorageAdapte
             const raw = adapter.get(STORAGE_KEY);
             if (!raw) return null;
             try {
-                return JSON.parse(raw) as AIConfig;
-            } catch {
+                return deserialize(raw) as AIConfig;
+            } catch (e) {
+                console.error('Failed to load config:', e);
                 return null;
             }
         },
@@ -58,3 +75,4 @@ export function createConfigStorage(adapter: StorageAdapter = localStorageAdapte
         },
     };
 }
+

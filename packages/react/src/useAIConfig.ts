@@ -18,6 +18,9 @@ export interface UseAIConfigOptions {
     initialConfig?: Partial<AIConfig>;
     /** Provider configuration (filtering, custom providers) */
     providerConfig?: ProviderConfig;
+    /** callbacks for custom storage serialization */
+    onSerialize?: (data: any) => string;
+    onDeserialize?: (data: string) => any;
 }
 
 export function useAIConfig(options: UseAIConfigOptions = {}) {
@@ -42,7 +45,10 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         [allProviders, providerId]
     );
 
-    const storage = useMemo(() => createConfigStorage(), []);
+    const storage = useMemo(() => createConfigStorage(undefined, {
+        serialize: options.onSerialize,
+        deserialize: options.onDeserialize
+    }), [options.onSerialize, options.onDeserialize]);
 
     // Load config from storage on mount
     useEffect(() => {
@@ -106,15 +112,14 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
             provider,
             apiKey,
             baseUrl,
-            model, // model is read at call time, not a dependency
+            model,
             proxyUrl: options.proxyUrl
         });
 
         setTestStatus(result.success ? 'success' : 'error');
         setTestResult(result);
         return result;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [provider, apiKey, baseUrl, options.proxyUrl]); // 不包含 model，避免选择模型时触发测试
+    }, [provider, apiKey, baseUrl, model, options.proxyUrl]);
 
     // Save config
     const save = useCallback(() => {

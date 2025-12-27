@@ -12,4 +12,11 @@ export default defineConfig({
             },
         }),
     ],
+    resolve: {
+        alias: {
+            '@ai-selector/core': '/packages/core/src',
+            '@ai-selector/react': '/packages/react/src',
+            '@ai-selector/vue': '/packages/vue/src',
+        },
+    },
 })

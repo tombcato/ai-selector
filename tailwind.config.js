@@ -5,6 +5,9 @@ export default {
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
     darkMode: 'class', // 启用 class 模式的暗色主题
+    corePlugins: {
+        preflight: false,
+    },
     theme: {
         extend: {},
     },

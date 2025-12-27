@@ -3,6 +3,9 @@
  * Framework-agnostic logic for AI provider configuration
  */
 
+// I18N
+export * from './i18n';
+
 // Types
 export type {
     Provider,

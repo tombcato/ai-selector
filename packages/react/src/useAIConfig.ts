@@ -5,9 +5,10 @@ import {
     resolveProviderConfig,
     type Model,
     type AIConfig,
-    type TestConnectionResult,
     type ProviderConfig,
-    type Provider
+    type Provider,
+    type ModelFetcher,
+    type TestConnectionResult
 } from '@ai-selector/core';
 
 export interface UseAIConfigOptions {
@@ -20,6 +21,8 @@ export interface UseAIConfigOptions {
     /** callbacks for custom storage serialization */
     onSerialize?: (data: any) => string;
     onDeserialize?: (data: string) => any;
+    /** Custom fetcher for models and connection check */
+    modelFetcher?: ModelFetcher;
 }
 
 export interface UseAIConfigReturn {
@@ -27,6 +30,7 @@ export interface UseAIConfigReturn {
     providerId: string;
     apiKey: string;
     model: string;
+    modelName: string;
     baseUrl: string;
     models: Model[];
     testStatus: 'idle' | 'testing' | 'success' | 'error';
@@ -49,6 +53,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
     const [providerId, setProviderId] = useState<string>(options.initialConfig?.providerId || '');
     const [apiKey, setApiKey] = useState<string>(options.initialConfig?.apiKey || '');
     const [model, setModel] = useState<string>(options.initialConfig?.model || '');
+    const [modelName, setModelName] = useState<string>(options.initialConfig?.modelName || '');
     const [baseUrl, setBaseUrl] = useState<string>(options.initialConfig?.baseUrl || '');
 
     const [models, setModels] = useState<Model[]>([]);
@@ -84,6 +89,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
             if (saved.providerId) setProviderId(saved.providerId);
             if (saved.apiKey) setApiKey(saved.apiKey);
             if (saved.model) setModel(saved.model);
+            if (saved.modelName) setModelName(saved.modelName);
             if (saved.baseUrl) setBaseUrl(saved.baseUrl);
         }
     }, [storage]);
@@ -124,15 +130,31 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setIsFetchingModels(true);
         setFetchModelError(null);
 
+        // Pre-fill with static models if empty to avoid flicker
+        if (models.length === 0) {
+            setModels(resolvedConfig.getModels(providerId));
+        }
+
         const fetchList = async () => {
             try {
-                const fetchedModels = await import('@ai-selector/core').then(m => m.fetchModels({
-                    provider,
-                    apiKey,
-                    baseUrl: actualBaseUrl,
-                    proxyUrl: options.proxyUrl,
-                    fallbackToStatic: false
-                }));
+                let fetchedModels: Model[];
+
+                if (options.modelFetcher) {
+                    fetchedModels = await options.modelFetcher({
+                        type: 'fetchModels',
+                        providerId: provider.id,
+                        baseUrl: actualBaseUrl,
+                        apiKey
+                    });
+                } else {
+                    fetchedModels = await import('@ai-selector/core').then(m => m.fetchModels({
+                        provider,
+                        apiKey,
+                        baseUrl: actualBaseUrl,
+                        proxyUrl: options.proxyUrl,
+                        fallbackToStatic: false
+                    }));
+                }
                 setModels(fetchedModels);
                 modelCacheRef.current.set(cacheKey, fetchedModels);
             } catch (e) {
@@ -149,7 +171,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         // Debounce for apiKey changes
         const timer = setTimeout(fetchList, 500);
         return () => clearTimeout(timer);
-    }, [providerId, provider, apiKey, baseUrl, resolvedConfig, options.proxyUrl]);
+    }, [providerId, provider, apiKey, baseUrl, resolvedConfig, options.proxyUrl, options.modelFetcher]);
 
     // ... (rest of hook)
 
@@ -171,13 +193,35 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setTestStatus('testing');
         setTestResult(null);
 
-        const result = await testConnection({
-            provider,
-            apiKey,
-            baseUrl,
-            model,
-            proxyUrl: options.proxyUrl
-        });
+        let result: TestConnectionResult;
+
+        if (options.modelFetcher) {
+            try {
+                const fetcherResult = await options.modelFetcher({
+                    type: 'checkConnection',
+                    providerId: provider.id,
+                    baseUrl: baseUrl || provider.baseUrl,
+                    apiKey,
+                    modelId: model
+                });
+                // Normalize result if fetcher returns incomplete object
+                result = {
+                    success: fetcherResult.success,
+                    latencyMs: fetcherResult.latency || fetcherResult.latencyMs,
+                    message: fetcherResult.message
+                };
+            } catch (e: any) {
+                result = { success: false, message: e.message || 'Unknown error' };
+            }
+        } else {
+            result = await testConnection({
+                provider,
+                apiKey,
+                baseUrl,
+                model,
+                proxyUrl: options.proxyUrl
+            });
+        }
 
         setTestResult(result);
         setTestStatus(result.success ? 'success' : 'error');
@@ -188,12 +232,28 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         }, 2000);
 
         return result;
-    }, [provider, apiKey, baseUrl, model, options.proxyUrl]);
+        return result;
+    }, [provider, apiKey, baseUrl, model, options.proxyUrl, options.modelFetcher]);
 
     // Save config
     const save = useCallback(() => {
-        storage.save({ providerId, apiKey, model, baseUrl });
-    }, [providerId, apiKey, model, baseUrl, storage]);
+        // Find model name from current list or use existing state
+        const foundModel = models.find(m => m.id === model);
+        const nameToSave = foundModel?.name || modelName || model;
+
+        // Update state if we found a better name
+        if (foundModel?.name && foundModel.name !== modelName) {
+            setModelName(foundModel.name);
+        }
+
+        storage.save({
+            providerId,
+            apiKey,
+            model,
+            modelName: nameToSave,
+            baseUrl
+        });
+    }, [providerId, apiKey, model, modelName, baseUrl, models, storage]);
 
     // Clear config
     const clear = useCallback(() => {
@@ -201,6 +261,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setProviderId('');
         setApiKey('');
         setModel('');
+        setModelName('');
         setBaseUrl('');
     }, [storage]);
 
@@ -209,6 +270,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setProviderId(id);
         setApiKey('');
         setModel('');
+        setModelName('');
         setBaseUrl('');
         setTestStatus('idle');
         setTestResult(null);
@@ -226,8 +288,9 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         providerId,
         apiKey,
         model,
+        modelName,
         baseUrl: baseUrl || provider?.baseUrl || ''
-    }), [providerId, apiKey, model, baseUrl, provider]);
+    }), [providerId, apiKey, model, modelName, baseUrl, provider]);
 
     return {
         // State
@@ -235,6 +298,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         providerId,
         apiKey,
         model,
+        modelName,
         baseUrl,
         models,
         testStatus,

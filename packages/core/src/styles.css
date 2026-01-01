@@ -59,21 +59,33 @@
     }
 
     .apmsu-dropdown {
-        @apply absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg;
+        @apply absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl;
         border-width: 1px;
-        transform-origin: top;
-        transition: all 0.15s ease-out;
+
+        /* 动画初始状态 */
+        max-height: 0;
         opacity: 0;
-        transform: scale(0.95);
+        transform-origin: top;
+        transform: translateY(-8px) scale(0.98);
         pointer-events: none;
         visibility: hidden;
+
+        /* 过渡效果 */
+        transition:
+            max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+            opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+            transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+            visibility 0s linear 0.4s;
     }
 
     .apmsu-dropdown-open {
+        max-height: 480px;
+        /* 足够大的高度以容纳内容 */
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
         pointer-events: auto;
         visibility: visible;
+        transition-delay: 0s;
     }
 
     .apmsu-dropdown-item {

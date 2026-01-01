@@ -15,6 +15,7 @@ interface ModelSelectProps {
     language?: Language;
     isFetchingModels?: boolean;
     fetchModelError?: string | null;
+    selectedModelName?: string;
 }
 
 export function ModelSelect({
@@ -28,7 +29,8 @@ export function ModelSelect({
     disabled,
     language = 'zh',
     isFetchingModels,
-    fetchModelError
+    fetchModelError,
+    selectedModelName
 }: ModelSelectProps) {
     const t = I18N[language];
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +52,7 @@ export function ModelSelect({
         m.id.toLowerCase().includes(modelSearch.toLowerCase())
     );
 
-    const activeModelName = models.find(m => m.id === selectedModelId)?.name || selectedModelId;
+    const activeModelName = models.find(m => m.id === selectedModelId)?.name || selectedModelName || selectedModelId;
 
     return (
         <div className="apmsu-field" ref={triggerRef}>

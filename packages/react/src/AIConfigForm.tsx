@@ -40,6 +40,7 @@ export function AIConfigForm({
     onSerialize,
     onDeserialize,
     language = 'zh',
+    modelFetcher,
 }: Props) {
     const t = useMemo(() => I18N[language], [language]);
 
@@ -47,6 +48,7 @@ export function AIConfigForm({
         providerId,
         apiKey,
         model,
+        modelName,
         baseUrl,
         models,
         testStatus,
@@ -69,6 +71,7 @@ export function AIConfigForm({
         initialConfig,
         onSerialize,
         onDeserialize,
+        modelFetcher,
     });
 
     const [providerOpen, setProviderOpen] = useState(false);
@@ -145,6 +148,7 @@ export function AIConfigForm({
                             language={language}
                             isFetchingModels={isFetchingModels}
                             fetchModelError={fetchModelError}
+                            selectedModelName={modelName}
                         />
                     </div>
                 </div>

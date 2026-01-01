@@ -7,7 +7,8 @@ import {
     type AIConfig,
     type TestConnectionResult,
     type ProviderConfig,
-    fetchModels
+    fetchModels,
+    type ModelFetcher,
 } from '@ai-selector/core';
 
 export interface UseAIConfigOptions {
@@ -16,12 +17,14 @@ export interface UseAIConfigOptions {
     providerConfig?: ProviderConfig;
     onSerialize?: (data: any) => string;
     onDeserialize?: (data: string) => any;
+    modelFetcher?: ModelFetcher;
 }
 
 export function useAIConfig(options: UseAIConfigOptions = {}) {
     const providerId = ref(options.initialConfig?.providerId || '');
     const apiKey = ref(options.initialConfig?.apiKey || '');
     const model = ref(options.initialConfig?.model || '');
+    const modelName = ref(options.initialConfig?.modelName || '');
     const baseUrl = ref(options.initialConfig?.baseUrl || '');
 
     const models = ref<Model[]>([]);
@@ -55,6 +58,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
                 providerId.value = saved.providerId;
                 if (saved.apiKey) apiKey.value = saved.apiKey;
                 if (saved.model) model.value = saved.model;
+                if (saved.modelName) modelName.value = saved.modelName;
                 if (saved.baseUrl) baseUrl.value = saved.baseUrl;
             }
         }
@@ -66,6 +70,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         if (!isLoaded.value) return;
         apiKey.value = '';
         model.value = '';
+        modelName.value = '';
         baseUrl.value = '';
         testStatus.value = 'idle';
         testResult.value = null;
@@ -111,15 +116,31 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         isFetchingModels.value = true;
         fetchModelError.value = null;
 
+        // Pre-fill with static models if empty to avoid flicker
+        if (models.value.length === 0) {
+            models.value = resolvedConfig.value.getModels(providerId.value);
+        }
+
         fetchTimer = setTimeout(async () => {
             try {
-                const fetchedModels = await fetchModels({
-                    provider: provider.value!,
-                    apiKey: apiKey.value,
-                    baseUrl: actualBaseUrl,
-                    proxyUrl: options.proxyUrl,
-                    fallbackToStatic: false
-                });
+                let fetchedModels: Model[];
+
+                if (options.modelFetcher) {
+                    fetchedModels = await options.modelFetcher({
+                        type: 'fetchModels',
+                        providerId: provider.value!.id,
+                        baseUrl: actualBaseUrl,
+                        apiKey: apiKey.value
+                    });
+                } else {
+                    fetchedModels = await fetchModels({
+                        provider: provider.value!,
+                        apiKey: apiKey.value,
+                        baseUrl: actualBaseUrl,
+                        proxyUrl: options.proxyUrl,
+                        fallbackToStatic: false
+                    });
+                }
                 models.value = fetchedModels;
                 modelCache.set(cacheKey, fetchedModels);
             } catch (e) {
@@ -149,13 +170,34 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         testStatus.value = 'testing';
         testResult.value = null;
 
-        const result = await testConnection({
-            provider: provider.value,
-            apiKey: apiKey.value,
-            baseUrl: baseUrl.value,
-            model: model.value,
-            proxyUrl: options.proxyUrl
-        });
+        let result: TestConnectionResult;
+
+        if (options.modelFetcher) {
+            try {
+                const fetcherResult = await options.modelFetcher({
+                    type: 'checkConnection',
+                    providerId: provider.value.id,
+                    baseUrl: baseUrl.value || provider.value.baseUrl,
+                    apiKey: apiKey.value,
+                    modelId: model.value
+                });
+                result = {
+                    success: fetcherResult.success,
+                    latencyMs: fetcherResult.latency || fetcherResult.latencyMs,
+                    message: fetcherResult.message
+                };
+            } catch (e: any) {
+                result = { success: false, message: e.message || 'Unknown error' };
+            }
+        } else {
+            result = await testConnection({
+                provider: provider.value,
+                apiKey: apiKey.value,
+                baseUrl: baseUrl.value,
+                model: model.value,
+                proxyUrl: options.proxyUrl
+            });
+        }
 
         testResult.value = result;
         testStatus.value = result.success ? 'success' : 'error';
@@ -169,10 +211,18 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     }
 
     function save() {
+        const foundModel = models.value.find(m => m.id === model.value);
+        const nameToSave = foundModel?.name || modelName.value || model.value;
+
+        if (foundModel?.name && foundModel.name !== modelName.value) {
+            modelName.value = foundModel.name;
+        }
+
         storage.save({
             providerId: providerId.value,
             apiKey: apiKey.value,
             model: model.value,
+            modelName: nameToSave,
             baseUrl: baseUrl.value
         });
     }
@@ -182,6 +232,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         providerId.value = '';
         apiKey.value = '';
         model.value = '';
+        modelName.value = '';
         baseUrl.value = '';
     }
 
@@ -195,6 +246,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         providerId: providerId.value,
         apiKey: apiKey.value,
         model: model.value,
+        modelName: modelName.value,
         baseUrl: baseUrl.value || provider.value?.baseUrl || ''
     }));
 
@@ -203,6 +255,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         providerId,
         apiKey,
         model,
+        modelName,
         baseUrl,
         models,
         testStatus,

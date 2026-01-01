@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { useAIConfig } from './useAIConfig';
 
-import { I18N, type Language, type AIConfig, type ProviderConfig, type TestConnectionResult } from '@ai-selector/core';
+import { I18N, type Language, type AIConfig, type ProviderConfig, type TestConnectionResult, type ModelFetcher } from '@ai-selector/core';
 
 // Sub-components
 import ProviderSelect from './ProviderSelect.vue';
@@ -21,6 +21,7 @@ interface Props {
   onSerialize?: (data: any) => string;
   onDeserialize?: (data: string) => any;
   language?: Language;
+  modelFetcher?: ModelFetcher;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -39,6 +40,7 @@ const {
   providerId,
   apiKey,
   model,
+  modelName,
   baseUrl,
   models,
   testStatus,
@@ -57,6 +59,7 @@ const {
   initialConfig: props.initialConfig,
   onSerialize: props.onSerialize,
   onDeserialize: props.onDeserialize,
+  modelFetcher: props.modelFetcher,
 });
 
 const t = computed(() => I18N[props.language]);
@@ -150,6 +153,7 @@ function updateBaseUrl(val: string) {
             :language="language"
             :isFetchingModels="isFetchingModels"
             :fetchModelError="fetchModelError"
+            :selectedModelName="modelName"
           />
         </div>
       </div>

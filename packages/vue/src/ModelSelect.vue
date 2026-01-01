@@ -12,6 +12,7 @@ interface Props {
   language?: Language;
   isFetchingModels?: boolean;
   fetchModelError?: string | null;
+  selectedModelName?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -36,7 +37,7 @@ const filteredModels = computed(() =>
 );
 
 const activeModelName = computed(() => 
-  props.models.find(m => m.id === props.selectedModelId)?.name || props.selectedModelId
+  props.models.find(m => m.id === props.selectedModelId)?.name || props.selectedModelName || props.selectedModelId
 );
 
 function handleClickOutside(e: MouseEvent) {

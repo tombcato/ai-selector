@@ -8,6 +8,27 @@
 // export type AuthType = 'bearer' | 'x-api-key' | 'query-param' | 'none'; // REMOVED
 export type ApiFormat = 'openai' | 'anthropic' | 'gemini' | 'cohere';
 
+// ============ Model Fetcher Types ============
+
+export type FetcherActionType = 'fetchModels' | 'checkConnection';
+
+export interface FetcherParams {
+    type: FetcherActionType;
+    providerId: string;
+    baseUrl: string;
+    apiKey?: string;
+    modelId?: string; // only for checkConnection
+}
+
+/** 
+ * Custom fetcher for retrieving models and checking connection.
+ * If provided, this will bypass internal fetch logic.
+ * 
+ * - type='fetchModels': returns Promise<Model[]>
+ * - type='checkConnection': returns Promise<{ success: boolean; latency?: number; message?: string }>
+ */
+export type ModelFetcher = (params: FetcherParams) => Promise<any>;
+
 export interface Provider {
     id: string;
     name: string;
@@ -43,6 +64,7 @@ export interface AIConfig {
     providerId: string;
     apiKey: string;
     model: string;
+    modelName?: string;
     baseUrl?: string;
 }
 
@@ -106,8 +128,14 @@ export interface ProviderConfig {
 
 /** AIConfigForm 组件的 Props */
 export interface AIConfigFormProps {
-    /** 后端代理地址（必需） */
-    proxyUrl: string;
+    /** 
+     * 自定义请求处理器 
+     * 用于接管获取模型列表和连通性测试的请求
+     * 如果提供此函数，proxyUrl 在这两种操作中将被忽略
+     */
+    modelFetcher?: ModelFetcher;
+    /** 后端代理地址（必需，除非提供了 modelFetcher） */
+    proxyUrl?: string; // Now optional if modelFetcher is used
     /** Provider 配置（可选，默认使用全部内置 Providers） */
     config?: ProviderConfig;
     /** 初始配置（可选，用于编辑已有配置） */

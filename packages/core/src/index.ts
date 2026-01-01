@@ -21,6 +21,10 @@ export type {
     ProviderConfig,
     CustomProviderDefinition,
     AIConfigFormProps,
+    // Fetcher types
+    ModelFetcher,
+    FetcherParams,
+    FetcherActionType,
 } from './types';
 
 // Providers

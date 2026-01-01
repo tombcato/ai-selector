@@ -45,7 +45,7 @@
 ---
 
 ## 📸 演示预览
-
+本项目 UI 中的文本滚动动效由 **[Smart Ticker](https://github.com/tombcato/smart-ticker)** 提供支持。
 <div align="center">
 
 ![Demo Preview](./docs/aiconfig_mockup.gif)
@@ -371,6 +371,7 @@ ai-provider-selector/
 ```
 
 ---
+
 
 ## 📜 许可证
 

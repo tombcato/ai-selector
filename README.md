@@ -35,7 +35,7 @@
   <p>
     <a href="https://tombcato.github.io/ai-selector">🚀 在线演示 (Live Demo)</a>
     ·
-    <a href="#-aiconfigform-参数详解">🔧 API 文档</a>
+    <a href="#-核心组件-aiconfigform-参数详解">🔧 API 文档</a>
     ·
     <a href="#-快速开始">📖 快速开始</a>
     

@@ -1,0 +1,40 @@
+
+> @tombcato/ai-selector-react@0.1.0 build:demo
+> vite build -c vite.demo.config.ts
+
+鈻?[WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
+
+    package.json:21:12:
+      21 鈹?            "types": "./dist/index.d.ts"
+         鈺?            ~~~~~~~
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:19:12:
+      19 鈹?            "import": "./dist/index.js",
+         鈺?            ~~~~~~~~
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:20:12:
+      20 鈹?            "require": "./dist/index.umd.cjs",
+         鈺?            ~~~~~~~~~
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+Unable to resolve `@import "@ai-selector/core/styles.css"` from C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/packages/react/src
+[32m鉁?[39m 3 modules transformed.
+鉁?[39m Build failed in 468ms
+error during build:
+[vite:css] [postcss] ENOENT: no such file or directory, open 'C:\Users\YOU\Desktop\project\ai-provider-model-selector-ui\packages\react\@ai-selector\core\styles.css'
+file: C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/packages/react/src/style.css:undefined:NaN
+    at async open (node:internal/fs/promises:639:25)
+    at async Object.readFile (node:internal/fs/promises:1243:14)
+    at async Object.load (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:43756:25)
+    at async loadImportContent (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-C9BXG1mU.js:673:19)
+    at async Promise.all (index 0)
+    at async resolveImportId (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-C9BXG1mU.js:629:27)
+    at async parseStyles$1 (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-C9BXG1mU.js:537:5)
+    at async Object.Once (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-C9BXG1mU.js:794:22)
+    at async LazyResult.runAsync (C:\Users\YOU\Desktop\project\ai-provider-model-selector-ui\node_modules\.pnpm\postcss@8.5.6\node_modules\postcss\lib\lazy-result.js:293:11)
+    at async runPostCSS (file:///C:/Users/YOU/Desktop/project/ai-provider-model-selector-ui/node_modules/.pnpm/vite@6.4.1_@types+node@25.0.3_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:43853:21)

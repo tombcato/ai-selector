@@ -39,6 +39,6 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build && tsc --emitDeclarationOnly --declaration",
-        "build:demo": "vite build"
+        "build:demo": "vite build -c vite.demo.config.ts"
     }
 }

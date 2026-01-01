@@ -36,7 +36,7 @@
     },
     "scripts": {
         "build": "vite build && vue-tsc --emitDeclarationOnly --declaration",
-        "build:demo": "vite build",
+        "build:demo": "vite build -c vite.demo.config.ts",
         "dev": "vite"
     }
 }

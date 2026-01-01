@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Selector - 通用 AI 配置组件</title>
+  <title data-i18n="title">AI Selector - 通用 AI 配置组件</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
@@ -91,7 +91,7 @@
             <animate attributeName="opacity" values="0.3;0.3;1;0.3" dur="5s" repeatCount="indefinite" />
           </rect>
         </svg>
-        <span class="font-bold text-lg dark:text-white text-gray-900">AI Selector</span>
+        <span class="font-bold text-lg dark:text-white text-gray-900" data-i18n="nav_title">AI Selector</span>
       </div>
       <div class="flex items-center gap-4">
         <!-- Language Toggle -->
@@ -142,35 +142,42 @@
       <div
         class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-400 text-gray-600 mb-8">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        v1.0 已发布 · 支持 React & Vue
+        <span data-i18n="hero_badge">v1.0 已发布 · 支持 React & Vue</span>
       </div>
 
       <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight dark:text-white text-gray-900">
-        AI 配置组件，<br>
-        <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        <span data-i18n="hero_title_1">AI 配置组件，</span><br>
+        <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent"
+          data-i18n="hero_title_2">
           简单快速接入 AI
         </span>
       </h1>
 
-      <p class="text-xl dark:text-gray-300 text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed font-medium">
+      <p class="text-xl dark:text-gray-300 text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed font-medium"
+        data-i18n="hero_desc">
         为你的应用一键接入 AI 配置能力，无需重复造轮子。
       </p>
 
       <div class="flex flex-wrap justify-center gap-3 mb-12 max-w-3xl mx-auto">
         <a href="#providers"
-          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600 hover:scale-105 transition-transform cursor-pointer">🚀
+          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600 hover:scale-105 transition-transform cursor-pointer"
+          data-i18n="badge_providers">🚀
           20+ 主流 AI 厂商</a>
         <span
-          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600">⚡
+          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600"
+          data-i18n="badge_models">⚡
           模型自动刷新</span>
         <span
-          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600">🔒
+          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600"
+          data-i18n="badge_security">🔒
           Key 安全存储</span>
         <span
-          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600">💾
+          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600"
+          data-i18n="badge_persistence">💾
           配置持久化</span>
         <span
-          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600">🎨
+          class="px-3 py-1 rounded-full dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm dark:text-gray-300 text-gray-600"
+          data-i18n="badge_darkmode">🎨
           支持深色模式</span>
       </div>
 
@@ -183,7 +190,7 @@
             <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)" />
             <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)" />
           </svg>
-          React Demo
+          <span data-i18n="btn_react">React Demo</span>
           <span class="text-blue-200 group-hover:translate-x-1 transition-transform">→</span>
         </a>
         <a href="./vue/index.html"
@@ -191,7 +198,7 @@
           <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
             <path d="M2 3l10 18L22 3h-4l-6 10.5L6 3H2z" />
           </svg>
-          Vue Demo
+          <span data-i18n="btn_vue">Vue Demo</span>
           <span class="text-emerald-200 group-hover:translate-x-1 transition-transform">→</span>
         </a>
         <a href="https://github.com/peanut996/ai-provider-selector" target="_blank"
@@ -201,7 +208,7 @@
               d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
               clip-rule="evenodd" />
           </svg>
-          立即使用
+          <span data-i18n="btn_start">立即使用</span>
           <span class="dark:text-gray-400 text-gray-500 group-hover:translate-x-1 transition-transform">→</span>
         </a>
       </div>
@@ -217,13 +224,15 @@
             <!-- Left: Form Mockup -->
             <div class="space-y-5">
               <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold dark:text-white text-gray-900">AI 配置</h3>
+                <h3 class="text-xl font-bold dark:text-white text-gray-900" data-i18n="preview_title">AI 配置</h3>
                 <span
-                  class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">已连接</span>
+                  class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  data-i18n="preview_connected">已连接</span>
               </div>
               <!-- Provider -->
               <div class="space-y-2">
-                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider">Provider</label>
+                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider"
+                  data-i18n="preview_provider">Provider</label>
                 <div
                   class="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-gray-50 dark:border-white/10 border-gray-200 border">
                   <div class="flex items-center gap-3">
@@ -242,7 +251,8 @@
               </div>
               <!-- API Key -->
               <div class="space-y-2">
-                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider">API Key</label>
+                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider"
+                  data-i18n="preview_apikey">API Key</label>
                 <div
                   class="flex items-center p-3 rounded-lg dark:bg-white/5 bg-gray-50 dark:border-white/10 border-gray-200 border">
                   <span class="dark:text-gray-400 text-gray-500 font-mono text-sm">sk-••••••••••••••••••••J4xK</span>
@@ -250,7 +260,8 @@
               </div>
               <!-- Model -->
               <div class="space-y-2">
-                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider">Model</label>
+                <label class="text-xs dark:text-gray-500 text-gray-400 uppercase tracking-wider"
+                  data-i18n="preview_model">Model</label>
                 <div
                   class="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-gray-50 dark:border-white/10 border-gray-200 border">
                   <span class="dark:text-white text-gray-900">gpt-4-turbo</span>
@@ -262,15 +273,18 @@
               </div>
               <div class="pt-4 flex gap-3">
                 <button
-                  class="flex-1 py-3 rounded-lg dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm font-medium dark:hover:bg-white/10 hover:bg-gray-200 transition-colors dark:text-white text-gray-700">测试连接</button>
+                  class="flex-1 py-3 rounded-lg dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 border text-sm font-medium dark:hover:bg-white/10 hover:bg-gray-200 transition-colors dark:text-white text-gray-700"
+                  data-i18n="preview_test">测试连接</button>
                 <button
-                  class="flex-1 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 text-sm font-semibold text-white">保存配置</button>
+                  class="flex-1 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 text-sm font-semibold text-white"
+                  data-i18n="preview_save">保存配置</button>
               </div>
             </div>
 
             <!-- Right: Description -->
             <div class="space-y-6">
-              <h2 class="text-3xl font-bold dark:text-white text-gray-900">AIConfigForm</h2>
+              <h2 class="text-3xl font-bold dark:text-white text-gray-900" data-i18n="feature_comp_title">AIConfigForm
+              </h2>
               <!-- <p class="dark:text-gray-400 text-gray-500 leading-relaxed">
                 一站式 AI 模型配置开发组件。支持 Provider 选择、Base URL 覆盖、API Key 安全存储、模型列表动态拉取、连通性测试与配置本地持久化。
               </p> -->
@@ -278,27 +292,32 @@
                 <li class="flex items-start gap-3">
                   <span
                     class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
-                  <span><strong class="dark:text-white text-gray-900">20+ 内置 Provider</strong> · 支持自定义增删改覆盖</span>
+                  <span data-i18n="feature_list_1"><strong class="dark:text-white text-gray-900">20+ 内置
+                      Provider</strong> · 支持自定义增删改覆盖</span>
                 </li>
                 <li class="flex items-start gap-3">
                   <span
                     class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
-                  <span><strong class="dark:text-white text-gray-900">API Key 安全存储</strong> · 本地加密，永不上传</span>
+                  <span data-i18n="feature_list_2"><strong class="dark:text-white text-gray-900">API Key 安全存储</strong> ·
+                    本地加密，永不上传</span>
                 </li>
                 <li class="flex items-start gap-3">
                   <span
                     class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
-                  <span><strong class="dark:text-white text-gray-900">模型列表智能管理</strong> · 离线静态 + 动态刷新</span>
+                  <span data-i18n="feature_list_3"><strong class="dark:text-white text-gray-900">模型列表智能管理</strong> ·
+                    离线静态 + 动态刷新</span>
                 </li>
                 <li class="flex items-start gap-3">
                   <span
                     class="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
-                  <span><strong class="dark:text-white text-gray-900">暗色模式 & 国际化</strong> · 中英双语，主题跟随</span>
+                  <span data-i18n="feature_list_4"><strong class="dark:text-white text-gray-900">暗色模式 & 国际化</strong> ·
+                    中英双语，主题跟随</span>
                 </li>
                 <li class="flex items-start gap-3">
                   <span
                     class="w-5 h-5 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
-                  <span><strong class="dark:text-white text-gray-900">丝滑交互动画</strong> · 展开收起、悬停高亮、状态过渡</span>
+                  <span data-i18n="feature_list_5"><strong class="dark:text-white text-gray-900">丝滑交互动画</strong> ·
+                    展开收起、悬停高亮、状态过渡</span>
                 </li>
               </ul>
             </div>
@@ -312,8 +331,8 @@
   <section id="providers" class="py-24 px-6">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900">支持的 Provider</h2>
-        <p class="dark:text-gray-400 text-gray-500">内置 20 个主流 AI 服务商，开箱即用</p>
+        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900" data-i18n="providers_title">支持的 Provider</h2>
+        <p class="dark:text-gray-400 text-gray-500" data-i18n="providers_desc">内置 20 个主流 AI 服务商，开箱即用</p>
       </div>
 
       <div class="overflow-hidden rounded-2xl dark:bg-white/[0.02] bg-white border dark:border-white/5 border-gray-200">
@@ -321,11 +340,16 @@
           <table class="w-full text-sm" id="providerTable">
             <thead>
               <tr class="dark:bg-white/5 bg-gray-50 border-b dark:border-white/5 border-gray-200">
-                <th class="px-6 py-4 text-left font-semibold dark:text-gray-300 text-gray-700">Provider</th>
-                <th class="px-6 py-4 text-left font-semibold dark:text-gray-300 text-gray-700">Base URL</th>
-                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700">API 格式</th>
-                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700">需要 Key</th>
-                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700">/models</th>
+                <th class="px-6 py-4 text-left font-semibold dark:text-gray-300 text-gray-700" data-i18n="th_provider">
+                  Provider</th>
+                <th class="px-6 py-4 text-left font-semibold dark:text-gray-300 text-gray-700" data-i18n="th_baseurl">
+                  Base URL</th>
+                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700" data-i18n="th_format">
+                  API 格式</th>
+                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700" data-i18n="th_key">需要
+                  Key</th>
+                <th class="px-6 py-4 text-center font-semibold dark:text-gray-300 text-gray-700" data-i18n="th_models">
+                  /models</th>
               </tr>
             </thead>
             <tbody class="divide-y dark:divide-white/5 divide-gray-100" id="providerBody">
@@ -351,8 +375,9 @@
   <section id="features" class="py-24 px-6">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900">为什么选择 AI Selector</h2>
-        <p class="dark:text-gray-400 text-gray-500">专为现代 AI 应用设计的配置方案</p>
+        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900" data-i18n="features_title">为什么选择 AI Selector
+        </h2>
+        <p class="dark:text-gray-400 text-gray-500" data-i18n="features_desc">专为现代 AI 应用设计的配置方案</p>
       </div>
 
       <div class="grid md:grid-cols-3 gap-6">
@@ -364,8 +389,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900">零配置启动</h3>
-          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed">npm install 后即可使用，无需繁琐的初始化配置。内置所有主流 AI
+          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900" data-i18n="card_1_title">零配置启动</h3>
+          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed" data-i18n="card_1_desc">npm install
+            后即可使用，无需繁琐的初始化配置。内置所有主流 AI
             厂商的默认配置。</p>
         </div>
 
@@ -378,8 +404,10 @@
                 d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900">TypeScript 优先</h3>
-          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed">完整的类型定义，享受代码提示与类型检查带来的开发体验提升。</p>
+          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900" data-i18n="card_2_title">TypeScript 优先
+          </h3>
+          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed" data-i18n="card_2_desc">
+            完整的类型定义，享受代码提示与类型检查带来的开发体验提升。</p>
         </div>
 
         <div
@@ -391,8 +419,9 @@
                 d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900">Headless 架构</h3>
-          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed">核心逻辑与 UI 解耦，你可以使用内置 UI 或完全自定义界面。</p>
+          <h3 class="text-lg font-semibold mb-2 dark:text-white text-gray-900" data-i18n="card_3_title">Headless 架构</h3>
+          <p class="dark:text-gray-500 text-gray-500 text-sm leading-relaxed" data-i18n="card_3_desc">核心逻辑与 UI
+            解耦，你可以使用内置 UI 或完全自定义界面。</p>
         </div>
       </div>
     </div>
@@ -402,8 +431,8 @@
   <section id="usage" class="py-24 px-6">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900">快速开始</h2>
-        <p class="dark:text-gray-400 text-gray-500">三步完成接入</p>
+        <h2 class="text-4xl font-bold mb-4 dark:text-white text-gray-900" data-i18n="usage_title">快速开始</h2>
+        <p class="dark:text-gray-400 text-gray-500" data-i18n="usage_desc">三步完成接入</p>
       </div>
 
       <div class="space-y-6">
@@ -413,7 +442,7 @@
             class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center font-bold text-sm flex-shrink-0 text-white">
             1</div>
           <div class="flex-1">
-            <h4 class="font-semibold mb-3 dark:text-white text-gray-900">安装依赖</h4>
+            <h4 class="font-semibold mb-3 dark:text-white text-gray-900" data-i18n="step_1_title">安装依赖</h4>
             <div class="code-block rounded-xl p-4 font-mono text-sm">
               <div class="mb-2 text-gray-400">// React</div>
               <div class="mb-4">
@@ -435,7 +464,7 @@
             class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center font-bold text-sm flex-shrink-0 text-white">
             2</div>
           <div class="flex-1">
-            <h4 class="font-semibold mb-3 dark:text-white text-gray-900">引入组件与样式</h4>
+            <h4 class="font-semibold mb-3 dark:text-white text-gray-900" data-i18n="step_2_title">引入组件与样式</h4>
             <div class="code-block rounded-xl p-4 font-mono text-sm overflow-x-auto">
               <div class="mb-2 text-gray-400">// React</div>
               <div class="mb-4">
@@ -463,7 +492,7 @@
             class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center font-bold text-sm flex-shrink-0 text-white">
             3</div>
           <div class="flex-1">
-            <h4 class="font-semibold mb-3 dark:text-white text-gray-900">使用组件 (直连模式)</h4>
+            <h4 class="font-semibold mb-3 dark:text-white text-gray-900" data-i18n="step_3_title">使用组件 (直连模式)</h4>
             <div class="code-block rounded-xl p-4 font-mono text-sm overflow-x-auto">
               <pre><span class="text-blue-300">&lt;AIConfigForm</span>
   <span class="text-orange-300">proxyUrl</span>=<span class="text-green-300">""</span> <span class="text-gray-500">// 留空即开启直连模式</span>
@@ -496,12 +525,15 @@
       </div>
       <div class="flex items-center gap-6">
         <a href="https://github.com/peanut996/ai-provider-selector"
-          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">GitHub</a>
+          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm"
+          data-i18n="footer_github">GitHub</a>
         <a href="./react/index.html"
-          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">React
+          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm"
+          data-i18n="footer_react">React
           Demo</a>
         <a href="./vue/index.html"
-          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">Vue
+          class="dark:text-gray-500 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm"
+          data-i18n="footer_vue">Vue
           Demo</a>
       </div>
     </div>
@@ -517,6 +549,154 @@
       } else {
         document.body.style.backgroundColor = '#ffffff';
       }
+    });
+
+    // i18n Data
+    const translations = {
+      zh: {
+        title: "AI Selector - 通用 AI 配置组件",
+        nav_title: "AI Selector",
+        lang_btn: "EN",
+        hero_badge: "v1.0 已发布 · 支持 React & Vue",
+        hero_title_1: "AI 配置组件，",
+        hero_title_2: "简单快速接入 AI",
+        hero_desc: "为你的应用一键接入 AI 配置能力，无需重复造轮子。",
+        badge_providers: "🚀 20+ 主流 AI 厂商",
+        badge_models: "⚡ 模型自动刷新",
+        badge_security: "🔒 Key 安全存储",
+        badge_persistence: "💾 配置持久化",
+        badge_darkmode: "🎨 支持深色模式",
+        btn_react: "React Demo",
+        btn_vue: "Vue Demo",
+        btn_start: "立即使用",
+        preview_title: "AI 配置",
+        preview_connected: "已连接",
+        preview_provider: "Provider",
+        preview_apikey: "API Key",
+        preview_model: "Model",
+        preview_test: "测试连接",
+        preview_save: "保存配置",
+        feature_comp_title: "AIConfigForm",
+        feature_list_1: "<strong class=\"dark:text-white text-gray-900\">20+ 内置 Provider</strong> · 支持自定义增删改覆盖",
+        feature_list_2: "<strong class=\"dark:text-white text-gray-900\">API Key 安全存储</strong> · 本地加密，永不上传",
+        feature_list_3: "<strong class=\"dark:text-white text-gray-900\">模型列表智能管理</strong> · 离线静态 + 动态刷新",
+        feature_list_4: "<strong class=\"dark:text-white text-gray-900\">暗色模式 & 国际化</strong> · 中英双语，主题跟随",
+        feature_list_5: "<strong class=\"dark:text-white text-gray-900\">丝滑交互动画</strong> · 展开收起、悬停高亮、状态过渡",
+        providers_title: "支持的 Provider",
+        providers_desc: "内置 20 个主流 AI 服务商，开箱即用",
+        th_provider: "Provider",
+        th_baseurl: "Base URL",
+        th_format: "API 格式",
+        th_key: "需要 Key",
+        th_models: "/models",
+        btn_view_more: "查看更多",
+        btn_collapse: "收起",
+        features_title: "为什么选择 AI Selector",
+        features_desc: "专为现代 AI 应用设计的配置方案",
+        card_1_title: "零配置启动",
+        card_1_desc: "npm install 后即可使用，无需繁琐的初始化配置。内置所有主流 AI 厂商的默认配置。",
+        card_2_title: "TypeScript 优先",
+        card_2_desc: "完整的类型定义，享受代码提示与类型检查带来的开发体验提升。",
+        card_3_title: "Headless 架构",
+        card_3_desc: "核心逻辑与 UI 解耦，你可以使用内置 UI 或完全自定义界面。",
+        usage_title: "快速开始",
+        usage_desc: "三步完成接入",
+        step_1_title: "安装依赖",
+        step_2_title: "引入组件与样式",
+        step_3_title: "使用组件 (直连模式)",
+        footer_github: "GitHub",
+        footer_react: "React Demo",
+        footer_vue: "Vue Demo",
+      },
+      en: {
+        title: "AI Selector - Universal AI Config Component",
+        nav_title: "AI Selector",
+        lang_btn: "中",
+        hero_badge: "v1.0 Released · Supports React & Vue",
+        hero_title_1: "AI Config Component,",
+        hero_title_2: "Integrate AI Simply & Quickly",
+        hero_desc: "One-click access to AI configuration capabilities for your app, no need to reinvent the wheel.",
+        badge_providers: "🚀 20+ Providers",
+        badge_models: "⚡ Auto Model Refresh",
+        badge_security: "🔒 Secure Key Storage",
+        badge_persistence: "💾 Config Persistence",
+        badge_darkmode: "🎨 Dark Mode Support",
+        btn_react: "React Demo",
+        btn_vue: "Vue Demo",
+        btn_start: "Get Started",
+        preview_title: "AI Config",
+        preview_connected: "Connected",
+        preview_provider: "Provider",
+        preview_apikey: "API Key",
+        preview_model: "Model",
+        preview_test: "Test Connection",
+        preview_save: "Save Config",
+        feature_comp_title: "AIConfigForm",
+        feature_list_1: "<strong class=\"dark:text-white text-gray-900\">20+ Built-in Providers</strong> · Customize, add, or override",
+        feature_list_2: "<strong class=\"dark:text-white text-gray-900\">Secure Key Storage</strong> · Local encryption, never uploaded",
+        feature_list_3: "<strong class=\"dark:text-white text-gray-900\">Smart Model Management</strong> · Offline static + dynamic refresh",
+        feature_list_4: "<strong class=\"dark:text-white text-gray-900\">Dark Mode & i18n</strong> · Bilingual, theme adaptation",
+        feature_list_5: "<strong class=\"dark:text-white text-gray-900\">Smooth Animations</strong> · Transitions, hover effects",
+        providers_title: "Supported Providers",
+        providers_desc: "20+ mainstream AI providers built-in, ready to use out of the box",
+        th_provider: "Provider",
+        th_baseurl: "Base URL",
+        th_format: "API Format",
+        th_key: "Needs Key",
+        th_models: "/models",
+        btn_view_more: "View More",
+        btn_collapse: "Collapse",
+        features_title: "Why AI Selector?",
+        features_desc: "Configuration solution designed for modern AI applications",
+        card_1_title: "Zero Config Start",
+        card_1_desc: "Just npm install and use. No tedious initialization required. Default configurations for all mainstream AI providers included.",
+        card_2_title: "TypeScript First",
+        card_2_desc: "Complete type definitions for better development experience with code completion and type checking.",
+        card_3_title: "Headless Architecture",
+        card_3_desc: "Decoupled logic and UI. You can use the built-in UI or build your own completely custom interface.",
+        usage_title: "Quick Start",
+        usage_desc: "Integrate in 3 steps",
+        step_1_title: "Install Dependencies",
+        step_2_title: "Import Component & Style",
+        step_3_title: "Usage (Direct Connection)",
+        footer_github: "GitHub",
+        footer_react: "React Demo",
+        footer_vue: "Vue Demo",
+      }
+    };
+
+    let currentLang = 'zh';
+
+    function updateLanguage() {
+      const t = translations[currentLang];
+
+      // Update Title
+      document.title = t.title;
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+      // Update elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) {
+          if (el.tagName === 'LI' || el.tagName === 'SPAN' && key.startsWith('feature_list')) {
+            el.innerHTML = t[key];
+          } else {
+            el.innerHTML = t[key];
+          }
+        }
+      });
+
+      // Update language toggle button text
+      document.getElementById('langToggle').textContent = t.lang_btn;
+
+      renderTable();
+    }
+
+    // Language Toggle
+    const langToggle = document.getElementById('langToggle');
+    langToggle.addEventListener('click', () => {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      updateLanguage();
     });
 
     // Provider Data (from providers.ts)
@@ -584,10 +764,18 @@
     const toggleIcon = document.getElementById('toggleIcon');
 
     function renderTable() {
+      const t = translations[currentLang];
       const toShow = showAll ? providers : providers.slice(0, DEFAULT_COUNT);
       providerBody.innerHTML = toShow.map(renderProvider).join('');
-      toggleText.textContent = showAll ? '收起' : `查看更多 (${providers.length - DEFAULT_COUNT})`;
-      toggleIcon.style.transform = showAll ? 'rotate(180deg)' : '';
+
+      const remaining = providers.length - DEFAULT_COUNT;
+      if (showAll) {
+        toggleText.textContent = t.btn_collapse;
+        toggleIcon.style.transform = 'rotate(180deg)';
+      } else {
+        toggleText.textContent = `${t.btn_view_more} (${remaining})`;
+        toggleIcon.style.transform = '';
+      }
     }
 
     toggleBtn.addEventListener('click', () => {
@@ -595,6 +783,8 @@
       renderTable();
     });
 
+    // Initialize
+    updateLanguage();
     renderTable();
   </script>
 

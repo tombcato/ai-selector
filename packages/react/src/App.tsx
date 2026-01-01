@@ -102,7 +102,7 @@ function App() {
                             React Adapter Demo
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-zinc-500 mt-2">
-                            Powered by @ai-selector/react + AIConfigForm 组件
+                            Powered by @tombcato/ai-selector-react + AIConfigForm 组件
                         </p>
                     </div>
                     <div className="flex items-center gap-2">

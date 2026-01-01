@@ -108,7 +108,7 @@ function handleChange(config: Partial<AIConfig>) {
             Vue Adapter Demo
           </h1>
           <p class="text-sm text-gray-500 dark:text-zinc-500 mt-2">
-            Powered by @ai-selector/vue + AIConfigForm 组件
+            Powered by @tombcato/ai-selector-vue + AIConfigForm 组件
           </p>
         </div>
         <div class="flex items-center gap-2">

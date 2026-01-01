@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { useAIConfig } from './useAIConfig';
 
-import { I18N, type Language, type AIConfig, type ProviderConfig, type TestConnectionResult, type ModelFetcher } from '@ai-selector/core';
+import { I18N, type Language, type AIConfig, type ProviderConfig, type TestConnectionResult, type ModelFetcher } from '@tombcato/ai-selector-core';
 
 // Sub-components
 import ProviderSelect from './ProviderSelect.vue';
@@ -51,6 +51,7 @@ const {
   config: currentConfig,
   runTest,
   save,
+  selectModel,
   isFetchingModels,
   fetchModelError,
 } = useAIConfig({
@@ -98,8 +99,8 @@ function updateApiKey(val: string) {
   apiKey.value = val;
 }
 
-function updateModel(id: string) {
-  model.value = id;
+function updateModel(id: string, name?: string) {
+  selectModel(id, name);
 }
 
 function updateBaseUrl(val: string) {

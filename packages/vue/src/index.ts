@@ -18,4 +18,4 @@ export type {
     CustomProviderDefinition,
     TestConnectionResult,
     AIConfigFormProps,
-} from '@ai-selector/core';
+} from '@tombcato/ai-selector-core';

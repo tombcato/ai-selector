@@ -1,5 +1,5 @@
 {
-    "name": "@ai-selector/react",
+    "name": "@tombcato/ai-selector-react",
     "version": "0.1.0",
     "description": "React adapter for AI Provider Selector",
     "type": "module",
@@ -11,9 +11,20 @@
         "react-dom": ">=18.0.0"
     },
     "dependencies": {
-        "@ai-selector/core": "workspace:*",
+        "@tombcato/ai-selector-core": "workspace:*",
         "@tombcato/smart-ticker": "^1.0.4"
     },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.umd.cjs",
+            "types": "./dist/index.d.ts"
+        },
+        "./style.css": "./dist/index.css"
+    },
+    "files": [
+        "dist"
+    ],
     "devDependencies": {
         "@types/node": "^25.0.3",
         "@types/react": "^18.2.0",
@@ -27,6 +38,7 @@
     },
     "scripts": {
         "dev": "vite",
-        "build": "tsc"
+        "build": "vite build && tsc --emitDeclarationOnly --declaration",
+        "build:demo": "vite build"
     }
 }

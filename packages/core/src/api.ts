@@ -59,8 +59,9 @@ export async function testConnection(options: TestConnectionOptions): Promise<Te
         }
 
         const headers = strategy.buildHeaders(apiKey);
-        const testPayload = strategy.buildTestPayload(targetModel);
-        const endpoint = strategy.getTestEndpoint(actualBaseUrl, apiKey, targetModel);
+        // 使用聊天接口进行测试，发送最简单的请求
+        const testPayload = strategy.buildChatPayload(targetModel, [{ role: 'user', content: 'Hi' }], 5);
+        const endpoint = strategy.getChatEndpoint(actualBaseUrl, apiKey, targetModel);
 
         const response = await fetch(endpoint, {
             method: 'POST',

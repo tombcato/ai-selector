@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
-import type { Provider, Language } from '@ai-selector/core';
-import { I18N } from '@ai-selector/core';
+import type { Provider, Language } from '@tombcato/ai-selector-core';
+import { I18N } from '@tombcato/ai-selector-core';
 import { SmartText } from './SmartText';
 
 interface ProviderSelectProps {

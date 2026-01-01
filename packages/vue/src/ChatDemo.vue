@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useAIConfig } from './useAIConfig';
+import { sendDirectChat } from '@tombcato/ai-selector-core';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -8,7 +9,7 @@ interface Message {
 }
 
 const props = defineProps<{
-  proxyUrl: string;
+  proxyUrl?: string; // 现在是可选的
 }>();
 
 const aiConfig = useAIConfig({ proxyUrl: props.proxyUrl });
@@ -36,26 +37,50 @@ async function sendMessage() {
   scrollToBottom();
 
   try {
-    const response = await fetch(`${props.proxyUrl}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        provider_id: aiConfig.providerId.value,
-        api_key: aiConfig.apiKey.value,
-        model: aiConfig.model.value,
-        base_url: aiConfig.config.value.baseUrl,
-        api_format: aiConfig.provider.value?.apiFormat || 'openai',
-        messages: messages.value.map(m => ({ role: m.role, content: m.content })),
-        max_tokens: 2048,
-      }),
-    });
+    let assistantContent = '';
 
-    const data = await response.json();
+    if (props.proxyUrl) {
+      // 有代理地址时，走后端
+      const response = await fetch(`${props.proxyUrl}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider_id: aiConfig.providerId.value,
+          api_key: aiConfig.apiKey.value,
+          model: aiConfig.model.value,
+          base_url: aiConfig.config.value.baseUrl,
+          api_format: aiConfig.provider.value?.apiFormat || 'openai',
+          messages: messages.value.map(m => ({ role: m.role, content: m.content })),
+          max_tokens: 2048,
+        }),
+      });
 
-    if (data.success && data.content) {
-      messages.value.push({ role: 'assistant', content: data.content });
+      const data = await response.json();
+      if (data.success && data.content) {
+        assistantContent = data.content;
+      } else {
+        error.value = data.message || '请求失败';
+      }
     } else {
-      error.value = data.message || '请求失败';
+      // 无代理地址时，纯前端直连
+      const result = await sendDirectChat({
+        apiFormat: aiConfig.provider.value?.apiFormat || 'openai',
+        baseUrl: aiConfig.config.value.baseUrl || aiConfig.provider.value?.baseUrl || '',
+        apiKey: aiConfig.apiKey.value,
+        model: aiConfig.model.value,
+        messages: messages.value.map(m => ({ role: m.role, content: m.content })),
+        maxTokens: 2048,
+      });
+
+      if (result.success && result.content) {
+        assistantContent = result.content;
+      } else {
+        error.value = result.message || '请求失败';
+      }
+    }
+
+    if (assistantContent) {
+      messages.value.push({ role: 'assistant', content: assistantContent });
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : '网络错误';

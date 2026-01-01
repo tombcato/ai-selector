@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { I18N, type Language, type Provider, type Model } from '@ai-selector/core';
+import { I18N, type Language, type Provider, type Model } from '@tombcato/ai-selector-core';
 import SmartText from './SmartText.vue';
 
 interface Props {
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  select: [modelId: string];
+  select: [modelId: string, modelName?: string];
 }>();
 
 const isOpen = ref(false);
@@ -55,8 +55,8 @@ onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside);
 });
 
-function handleSelect(id: string) {
-  emit('select', id);
+function handleSelect(id: string, name?: string) {
+  emit('select', id, name);
   isOpen.value = false;
   modelSearch.value = '';
 }
@@ -109,7 +109,7 @@ function handleSelect(id: string) {
             v-for="m in filteredModels"
             :key="m.id"
             type="button"
-            @click="handleSelect(m.id)"
+            @click="handleSelect(m.id, m.name)"
             :class="['apmsu-dropdown-item', selectedModelId === m.id && 'apmsu-dropdown-item-active']"
           >
             <span>{{ m.name }}</span>

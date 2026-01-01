@@ -14,9 +14,9 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@ai-selector/core': '/packages/core/src',
-            '@ai-selector/react': '/packages/react/src',
-            '@ai-selector/vue': '/packages/vue/src',
+            '@tombcato/ai-selector-core': '/packages/core/src',
+            '@tombcato/ai-selector-react': '/packages/react/src',
+            '@tombcato/ai-selector-vue': '/packages/vue/src',
         },
     },
 })

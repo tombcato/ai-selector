@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { AIConfigForm, useAIConfig } from './index'
-import customProviders from './custom-providers.json';
-import type { AIConfig, TestConnectionResult, ProviderConfig, CustomProviderDefinition } from '@ai-selector/core'
+import type { AIConfig, TestConnectionResult, ProviderConfig } from '@tombcato/ai-selector-core'
 
 // 示例配置
 const providerConfig: ProviderConfig = {
@@ -57,7 +56,8 @@ const providerConfig: ProviderConfig = {
     // }
 }
 
-const PROXY_URL = 'http://localhost:8000'
+// 设为空字符串测试纯前端直连模式，设为 'http://localhost:8000' 走后端代理
+const PROXY_URL = import.meta.env.VITE_PROXY_URL || ''
 
 // 聊天消息类型
 interface Message {
@@ -134,7 +134,7 @@ function App() {
                     language={lang}
                     proxyUrl={PROXY_URL}
                     config={providerConfig}
-                    title="AI 配置"
+                    title="AI Config Form"
                     showPreview
                     onSave={handleSave}
                     onTestResult={handleTestResult}
@@ -158,7 +158,7 @@ function App() {
 // 对话测试组件
 // ============================================================================
 
-function ChatDemo({ proxyUrl }: { proxyUrl: string }) {
+function ChatDemo({ proxyUrl }: { proxyUrl?: string }) {
     const aiConfig = useAIConfig({ proxyUrl })
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
@@ -168,7 +168,9 @@ function ChatDemo({ proxyUrl }: { proxyUrl: string }) {
 
     // 自动滚动到底部
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        if (messages.length > 0) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
     }, [messages])
 
     const canSend = aiConfig.isValid && input.trim() && !isLoading
@@ -186,26 +188,51 @@ function ChatDemo({ proxyUrl }: { proxyUrl: string }) {
         setIsLoading(true)
 
         try {
-            const response = await fetch(`${proxyUrl}/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    provider_id: aiConfig.providerId,
-                    api_key: aiConfig.apiKey,
-                    model: aiConfig.model,
-                    base_url: aiConfig.config.baseUrl,
-                    api_format: aiConfig.provider?.apiFormat || 'openai',
-                    messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-                    max_tokens: 2048,
-                }),
-            })
+            let assistantContent = ''
 
-            const data = await response.json()
+            if (proxyUrl) {
+                // 有代理地址时，走后端
+                const response = await fetch(`${proxyUrl}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider_id: aiConfig.providerId,
+                        api_key: aiConfig.apiKey,
+                        model: aiConfig.model,
+                        base_url: aiConfig.config.baseUrl,
+                        api_format: aiConfig.provider?.apiFormat || 'openai',
+                        messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+                        max_tokens: 2048,
+                    }),
+                })
 
-            if (data.success && data.content) {
-                setMessages([...newMessages, { role: 'assistant', content: data.content }])
+                const data = await response.json()
+                if (data.success && data.content) {
+                    assistantContent = data.content
+                } else {
+                    setError(data.message || '请求失败')
+                }
             } else {
-                setError(data.message || '请求失败')
+                // 无代理地址时，纯前端直连
+                const { sendDirectChat } = await import('@tombcato/ai-selector-core')
+                const result = await sendDirectChat({
+                    apiFormat: aiConfig.provider?.apiFormat || 'openai',
+                    baseUrl: aiConfig.config.baseUrl || aiConfig.provider?.baseUrl || '',
+                    apiKey: aiConfig.apiKey,
+                    model: aiConfig.model,
+                    messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+                    maxTokens: 2048,
+                })
+
+                if (result.success && result.content) {
+                    assistantContent = result.content
+                } else {
+                    setError(result.message || '请求失败')
+                }
+            }
+
+            if (assistantContent) {
+                setMessages([...newMessages, { role: 'assistant', content: assistantContent }])
             }
         } catch (e) {
             setError(e instanceof Error ? e.message : '网络错误')

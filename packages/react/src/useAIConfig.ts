@@ -9,7 +9,7 @@ import {
     type Provider,
     type ModelFetcher,
     type TestConnectionResult
-} from '@ai-selector/core';
+} from '@tombcato/ai-selector-core';
 
 export interface UseAIConfigOptions {
     /** Optional proxy URL for API requests */
@@ -43,6 +43,7 @@ export interface UseAIConfigReturn {
     setProviderId: (id: string) => void;
     setApiKey: Dispatch<SetStateAction<string>>;
     setModel: Dispatch<SetStateAction<string>>;
+    selectModel: (modelId: string, name?: string) => void;
     setBaseUrl: Dispatch<SetStateAction<string>>;
     runTest: () => Promise<TestConnectionResult | undefined>;
     save: () => void;
@@ -147,7 +148,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
                         apiKey
                     });
                 } else {
-                    fetchedModels = await import('@ai-selector/core').then(m => m.fetchModels({
+                    fetchedModels = await import('@tombcato/ai-selector-core').then(m => m.fetchModels({
                         provider,
                         apiKey,
                         baseUrl: actualBaseUrl,
@@ -276,6 +277,18 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setTestResult(null);
     }, []);
 
+    // Select a model (sets both id and name)
+    const selectModel = useCallback((modelId: string, name?: string) => {
+        setModel(modelId);
+        // 如果提供了 name 就用，否则从 models 列表查找，最后用 id
+        if (name) {
+            setModelName(name);
+        } else {
+            const found = models.find(m => m.id === modelId);
+            setModelName(found?.name || modelId);
+        }
+    }, [models]);
+
     // Derived state
     const isValid = useMemo(() => {
         if (!providerId || !model) return false;
@@ -313,6 +326,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn
         setProviderId: changeProviderId,
         setApiKey,
         setModel,
+        selectModel,
         setBaseUrl,
         runTest,
         save,

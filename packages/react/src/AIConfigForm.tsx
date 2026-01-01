@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useAIConfig } from './useAIConfig';
-import { I18N, type Language, type AIConfig, type AIConfigFormProps, type TestConnectionResult } from '@ai-selector/core';
+import { I18N, type Language, type AIConfig, type AIConfigFormProps, type TestConnectionResult } from '@tombcato/ai-selector-core';
 import { ProviderSelect } from './ProviderSelect';
 import { AuthInput } from './AuthInput';
 import { ModelSelect } from './ModelSelect';
@@ -58,7 +58,7 @@ export function AIConfigForm({
         isValid,
         setProviderId,
         setApiKey,
-        setModel,
+        selectModel,
         setBaseUrl,
         runTest,
         save,
@@ -140,7 +140,7 @@ export function AIConfigForm({
                             provider={provider}
                             models={models}
                             selectedModelId={model}
-                            onSelect={setModel}
+                            onSelect={selectModel}
                             isOpen={modelOpen}
                             setIsOpen={setModelOpen}
                             hasApiKey={!!apiKey}

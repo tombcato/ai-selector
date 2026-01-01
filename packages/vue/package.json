@@ -1,5 +1,5 @@
 {
-    "name": "@ai-selector/vue",
+    "name": "@tombcato/ai-selector-vue",
     "version": "0.1.0",
     "description": "Vue adapter for AI Provider Selector",
     "type": "module",
@@ -10,9 +10,20 @@
         "vue": "^3.0.0"
     },
     "dependencies": {
-        "@ai-selector/core": "workspace:*",
+        "@tombcato/ai-selector-core": "workspace:*",
         "@tombcato/smart-ticker": "^1.0.4"
     },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.umd.cjs",
+            "types": "./dist/index.d.ts"
+        },
+        "./style.css": "./dist/index.css"
+    },
+    "files": [
+        "dist"
+    ],
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.3",
         "autoprefixer": "^10.4.23",
@@ -20,10 +31,12 @@
         "tailwindcss": "^3.4.19",
         "typescript": "^5.3.0",
         "vite": "^6.4.1",
-        "vue": "^3.3.0"
+        "vue": "^3.3.0",
+        "vue-tsc": "^3.2.1"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "vite build && vue-tsc --emitDeclarationOnly --declaration",
+        "build:demo": "vite build",
         "dev": "vite"
     }
 }

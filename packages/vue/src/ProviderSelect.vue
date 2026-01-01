@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { I18N, type Language, type Provider } from '@ai-selector/core';
+import { I18N, type Language, type Provider } from '@tombcato/ai-selector-core';
 import SmartText from './SmartText.vue';
 
 interface Props {

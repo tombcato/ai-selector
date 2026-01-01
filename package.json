@@ -1,17 +1,17 @@
 {
-    "name": "ai-provider-model-selector-ui",
-    "private": true,
+    "name": "ai-selector",
+    "private": false,
     "version": "0.0.1",
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "dev:react": "pnpm --filter @ai-selector/react dev",
-        "dev:vue": "pnpm --filter @ai-selector/vue dev",
+        "dev:react": "pnpm --filter @tombcato/ai-selector-react dev",
+        "dev:vue": "pnpm --filter @tombcato/ai-selector-vue dev",
         "build": "vite build"
     },
     "dependencies": {
-        "@ai-selector/core": "workspace:*",
-        "@ai-selector/react": "workspace:*",
+        "@tombcato/ai-selector-core": "workspace:*",
+        "@tombcato/ai-selector-react": "workspace:*",
         "react": "^18.3.1",
         "react-dom": "^18.3.1"
     },

@@ -17,4 +17,4 @@ export type {
     ProviderConfig,
     CustomProviderDefinition,
     TestConnectionResult,
-} from '@ai-selector/core';
+} from '@tombcato/ai-selector-core';

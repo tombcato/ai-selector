@@ -1,13 +1,13 @@
 import { useRef, useEffect, useState } from 'react';
-import type { Model, Provider, Language } from '@ai-selector/core';
-import { I18N } from '@ai-selector/core';
+import type { Model, Provider, Language } from '@tombcato/ai-selector-core';
+import { I18N } from '@tombcato/ai-selector-core';
 import { SmartText } from './SmartText';
 
 interface ModelSelectProps {
     provider: Provider | null;
     models: Model[];
     selectedModelId: string;
-    onSelect: (modelId: string) => void;
+    onSelect: (modelId: string, modelName?: string) => void;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     hasApiKey: boolean;
@@ -105,7 +105,7 @@ export function ModelSelect({
                                 key={m.id}
                                 type="button"
                                 onClick={() => {
-                                    onSelect(m.id);
+                                    onSelect(m.id, m.name);
                                     setIsOpen(false);
                                     setModelSearch('');
                                 }}

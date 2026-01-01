@@ -2,10 +2,11 @@
 import { ref, onMounted, watch } from 'vue';
 import AIConfigForm from './AIConfigForm.vue';
 import ChatDemo from './ChatDemo.vue';
-import type { AIConfig, TestConnectionResult, ProviderConfig } from '@ai-selector/core';
+import type { AIConfig, TestConnectionResult, ProviderConfig } from '@tombcato/ai-selector-core';
 
 // 常量
-const PROXY_URL = 'http://localhost:8000';
+// 设为空字符串测试纯前端直连模式，设为 'http://localhost:8000' 走后端代理
+const PROXY_URL = import.meta.env.VITE_PROXY_URL || '';
 
 // 示例配置
 const providerConfig: ProviderConfig = {

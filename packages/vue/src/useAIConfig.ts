@@ -9,7 +9,7 @@ import {
     type ProviderConfig,
     fetchModels,
     type ModelFetcher,
-} from '@ai-selector/core';
+} from '@tombcato/ai-selector-core';
 
 export interface UseAIConfigOptions {
     proxyUrl?: string;
@@ -236,6 +236,18 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         baseUrl.value = '';
     }
 
+    // Select a model (sets both id and name)
+    function selectModel(modelId: string, name?: string) {
+        model.value = modelId;
+        // 如果提供了 name 就用，否则从 models 列表查找，最后用 id
+        if (name) {
+            modelName.value = name;
+        } else {
+            const found = models.value.find(m => m.id === modelId);
+            modelName.value = found?.name || modelId;
+        }
+    }
+
     const isValid = computed(() => {
         if (!providerId.value || !model.value) return false;
         if (provider.value?.needsApiKey && !apiKey.value) return false;
@@ -273,5 +285,6 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         runTest,
         save,
         clear,
+        selectModel,
     };
 }

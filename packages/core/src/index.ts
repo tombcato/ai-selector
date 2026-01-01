@@ -68,5 +68,9 @@ export {
 export {
     type ProviderStrategy,
     strategyRegistry,
-    getStrategy
+    getStrategy,
+    sendDirectChat,
+    testDirectConnection,
+    type DirectChatOptions,
+    type DirectChatResult,
 } from './strategies';

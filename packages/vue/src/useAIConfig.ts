@@ -1,14 +1,13 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import {
     testConnection,
-    fetchModels,
     createConfigStorage,
     resolveProviderConfig,
     type Model,
     type AIConfig,
     type TestConnectionResult,
     type ProviderConfig,
-    type Provider
+    fetchModels
 } from '@ai-selector/core';
 
 export interface UseAIConfigOptions {
@@ -28,6 +27,8 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     const models = ref<Model[]>([]);
     const testStatus = ref<'idle' | 'testing' | 'success' | 'error'>('idle');
     const testResult = ref<TestConnectionResult | null>(null);
+    const isFetchingModels = ref(false);
+    const fetchModelError = ref<string | null>(null);
 
     // Resolve provider config
     const resolvedConfig = computed(() => resolveProviderConfig(options.providerConfig));
@@ -70,48 +71,80 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         testResult.value = null;
     });
 
-    // Watch for provider/auth changes to fetch models
-    watch(
-        [provider, apiKey, baseUrl],
-        async ([newProvider, newApiKey, newBaseUrl]) => {
-            if (!newProvider) {
-                models.value = [];
-                return;
-            }
+    // Watch for provider/apikey/baseurl to update models (with caching)
+    let fetchTimer: any = null;
+    const modelCache = new Map<string, Model[]>();
 
-            // Get custom models from config
-            const customModels = resolvedConfig.value.getModels(newProvider.id);
+    watch([providerId, apiKey, baseUrl], () => {
+        if (fetchTimer) clearTimeout(fetchTimer);
 
-            if (newProvider.authType !== 'none' && !newApiKey) {
-                models.value = customModels;
-                return;
-            }
+        if (!providerId.value || !provider.value) {
+            models.value = [];
+            fetchModelError.value = null;
+            isFetchingModels.value = false;
+            return;
+        }
 
-            // If custom models and no API support, use them
-            if (customModels.length > 0 && !newProvider.supportsModelsApi) {
-                models.value = customModels;
-                return;
-            }
+        const shouldFetch = provider.value.supportsModelsApi && (!provider.value.needsApiKey || !!apiKey.value);
+        const actualBaseUrl = baseUrl.value || provider.value.baseUrl;
+        const cacheKey = `${providerId.value}|${actualBaseUrl}|${apiKey.value}`;
 
+        // Check cache first
+        const cachedModels = modelCache.get(cacheKey);
+        if (cachedModels) {
+            models.value = cachedModels;
+            fetchModelError.value = null;
+            isFetchingModels.value = false;
+            return;
+        }
+
+        if (!shouldFetch) {
+            const staticModels = resolvedConfig.value.getModels(providerId.value);
+            models.value = staticModels;
+            modelCache.set(cacheKey, staticModels);
+            fetchModelError.value = null;
+            isFetchingModels.value = false;
+            return;
+        }
+
+        // Set fetching immediately to fill debounce gap
+        isFetchingModels.value = true;
+        fetchModelError.value = null;
+
+        fetchTimer = setTimeout(async () => {
             try {
-                const fetched = await fetchModels({
-                    provider: newProvider,
-                    apiKey: newApiKey,
-                    baseUrl: newBaseUrl,
-                    proxyUrl: options.proxyUrl
+                const fetchedModels = await fetchModels({
+                    provider: provider.value!,
+                    apiKey: apiKey.value,
+                    baseUrl: actualBaseUrl,
+                    proxyUrl: options.proxyUrl,
+                    fallbackToStatic: false
                 });
-                models.value = fetched.length > 0 ? fetched : customModels;
-            } catch {
-                models.value = customModels;
+                models.value = fetchedModels;
+                modelCache.set(cacheKey, fetchedModels);
+            } catch (e) {
+                console.warn('Model fetch failed:', e);
+                fetchModelError.value = 'fetchModelsFailed';
+                models.value = resolvedConfig.value.getModels(providerId.value);
+                // Don't cache failed results
+            } finally {
+                isFetchingModels.value = false;
             }
-        },
-        { immediate: true }
-    );
+        }, 500);
+    }, { immediate: true });
+
+    // Reset test status when apiKey/baseUrl changes while in error/success state
+    watch([apiKey, baseUrl], () => {
+        if (testStatus.value === 'error' || testStatus.value === 'success') {
+            testStatus.value = 'idle';
+            testResult.value = null;
+        }
+    });
 
     // Actions
     async function runTest() {
         if (!provider.value) return;
-        if (provider.value.authType !== 'none' && !apiKey.value) return;
+        if (provider.value.needsApiKey && !apiKey.value) return;
 
         testStatus.value = 'testing';
         testResult.value = null;
@@ -124,8 +157,14 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
             proxyUrl: options.proxyUrl
         });
 
-        testStatus.value = result.success ? 'success' : 'error';
         testResult.value = result;
+        testStatus.value = result.success ? 'success' : 'error';
+
+        // Auto-revert to idle (always 2s)
+        setTimeout(() => {
+            testStatus.value = 'idle';
+        }, 2000);
+
         return result;
     }
 
@@ -148,7 +187,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
 
     const isValid = computed(() => {
         if (!providerId.value || !model.value) return false;
-        if (provider.value?.authType !== 'none' && !apiKey.value) return false;
+        if (provider.value?.needsApiKey && !apiKey.value) return false;
         return true;
     });
 
@@ -168,6 +207,8 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         models,
         testStatus,
         testResult,
+        isFetchingModels,
+        fetchModelError,
 
         // Computed
         provider,

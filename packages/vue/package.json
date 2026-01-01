@@ -10,7 +10,8 @@
         "vue": "^3.0.0"
     },
     "dependencies": {
-        "@ai-selector/core": "workspace:*"
+        "@ai-selector/core": "workspace:*",
+        "@tombcato/smart-ticker": "^1.0.4"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.3",

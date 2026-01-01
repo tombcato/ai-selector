@@ -1,256 +1,146 @@
 """
-AI Provider Selector - Python Backend Demo
-FastAPI 代理服务，解决 CORS 问题并提供统一的 API 接口
+AI Provider Proxy Server
+========================
 
-启动方式:
-    uvicorn server:app --reload --port 8000
-    
-或者直接运行:
+FastAPI 代理服务，解决浏览器 CORS 限制。
+
+端点:
+    /test   - 测试 AI Provider Model 连通性
+    /chat   - 发送聊天请求
+    /models - 获取模型列表
+
+启动:
     python server.py
+    # 或
+    uvicorn server:app --reload --port 8000
 """
 
-from fastapi import FastAPI, HTTPException
+from typing import Dict, List
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
 import httpx
 import time
 
+from models import (
+    ChatRequest, FetchModelsRequest,
+    TestConnectionResponse, ChatResponse, FetchModelsResponse,
+)
+from strategies import get_strategy, STRATEGY_REGISTRY
+
+# ============================================================================
+# 配置常量
+# ============================================================================
+    
+TIMEOUT_CHAT = 100.0      # 聊天请求超时 (秒)
+TIMEOUT_MODELS = 60.0    # 模型列表请求超时 (秒)
+
+# ============================================================================
+# FastAPI 应用
+# ============================================================================
+
 app = FastAPI(title="AI Provider Proxy", version="1.0.0")
 
-# CORS 配置 - 允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",  # Vue Demo
-        "http://127.0.0.1:5174",
-        "http://localhost:5175",  # Vue Demo (backup port)
-        "http://127.0.0.1:5175",
-    ],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# ============ 数据模型 ============
+# ============================================================================
+# 核心逻辑
+# ============================================================================
 
-class TestConnectionRequest(BaseModel):
-    """测试连通性请求"""
-    provider_id: str
-    api_key: str
-    model: Optional[str] = None
-    base_url: Optional[str] = None
-    api_format: str = "openai"  # openai | anthropic | gemini
-
-
-class FetchModelsRequest(BaseModel):
-    """获取模型列表请求"""
-    provider_id: str
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
+async def send_chat_request(api_format: str, base_url: str, api_key: str, model: str, messages: List[Dict[str, str]], max_tokens: int):
+    """发送聊天请求"""
+    strategy = get_strategy(api_format)
+    async with httpx.AsyncClient(timeout=TIMEOUT_CHAT) as client:
+        return await strategy.execute(client, base_url, api_key, model, messages, max_tokens)
 
 
-# ============ Provider 配置 ============
-
-PROVIDER_CONFIG = {
-    "openai": {
-        "base_url": "https://api.openai.com/v1",
-        "auth_type": "bearer",
-        "default_model": "gpt-4o-mini",
-    },
-    "anthropic": {
-        "base_url": "https://api.anthropic.com/v1",
-        "auth_type": "x-api-key",
-        "default_model": "claude-3-haiku-20240307",
-    },
-    "gemini": {
-        "base_url": "https://generativelanguage.googleapis.com/v1beta",
-        "auth_type": "query-param",
-        "default_model": "gemini-1.5-flash",
-    },
-    "deepseek": {
-        "base_url": "https://api.deepseek.com",
-        "auth_type": "bearer",
-        "default_model": "deepseek-chat",
-    },
-    "groq": {
-        "base_url": "https://api.groq.com/openai/v1",
-        "auth_type": "bearer",
-        "default_model": "llama-3.1-8b-instant",
-    },
-    "openrouter": {
-        "base_url": "https://openrouter.ai/api/v1",
-        "auth_type": "bearer",
-        "default_model": "google/gemini-2.0-flash-exp:free",
-    },
-}
+def format_error(e: Exception) -> str:
+    """格式化错误信息"""
+    if isinstance(e, httpx.HTTPStatusError):
+        return f"HTTP {e.response.status_code}: {e.response.text[:500]}"
+    elif isinstance(e, httpx.TimeoutException):
+        return f"请求超时 ({int(TIMEOUT_CHAT)}秒)"
+    return str(e)
 
 
-# ============ API 端点 ============
 
-@app.get("/")
+
+# ============================================================================
+# API 端点
+# ============================================================================
+
+@app.get("/", tags=["Health"])
 async def root():
-    return {"message": "AI Provider Proxy Server", "endpoints": ["/test", "/models"]}
+    return {
+        "status": "running",
+        "supported_formats": list(STRATEGY_REGISTRY.keys()),
+        "endpoints": ["/test", "/chat", "/models"],
+    }
 
 
-@app.post("/test")
-async def test_connection(req: TestConnectionRequest):
-    """
-    测试 AI Provider 连通性
-    发送一个简单的 chat completion 请求
-    """
-    provider = PROVIDER_CONFIG.get(req.provider_id, {})
-    base_url = req.base_url or provider.get("base_url", "")
-    model = req.model or provider.get("default_model", "")
-    
-    if not base_url:
-        raise HTTPException(status_code=400, detail=f"Unknown provider: {req.provider_id}")
-    
-    start_time = time.time()
-    
+@app.post("/test", response_model=TestConnectionResponse, tags=["Proxy"])
+async def test_connection(req: ChatRequest):
+    """测试连通性"""
+    start = time.time()
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            # 根据 API 格式发送不同请求
-            if req.api_format == "openai":
-                result = await _test_openai_format(client, base_url, req.api_key, model)
-            elif req.api_format == "anthropic":
-                result = await _test_anthropic_format(client, base_url, req.api_key, model)
-            elif req.api_format == "gemini":
-                result = await _test_gemini_format(client, base_url, req.api_key, model)
-            else:
-                raise HTTPException(status_code=400, detail=f"Unsupported format: {req.api_format}")
-        
-        latency = int((time.time() - start_time) * 1000)
-        
-        return {
-            "success": True,
-            "latency_ms": latency,
-            "message": "连接成功",
-            "response": result,
-        }
-        
-    except httpx.HTTPStatusError as e:
-        error_detail = e.response.text[:500] if e.response else str(e)
-        return {
-            "success": False,
-            "latency_ms": int((time.time() - start_time) * 1000),
-            "message": f"HTTP {e.response.status_code}: {error_detail}",
-        }
+        await send_chat_request(req.api_format, req.base_url, req.api_key, req.model, [{"role": "user", "content": "Hi"}], 5)
+        return TestConnectionResponse(success=True, latency_ms=int((time.time() - start) * 1000), message="连接成功")
     except Exception as e:
-        return {
-            "success": False,
-            "latency_ms": int((time.time() - start_time) * 1000),
-            "message": str(e),
-        }
+        return TestConnectionResponse(success=False, latency_ms=0, message=format_error(e))
 
 
-@app.post("/models")
+@app.post("/chat", response_model=ChatResponse, tags=["Proxy"])
+async def chat(req: ChatRequest):
+    """发送聊天请求"""
+    if not req.messages:
+        return ChatResponse(success=False, message="messages 不能为空")
+    
+    start = time.time()
+    try:
+        result = await send_chat_request(req.api_format, req.base_url, req.api_key, req.model, req.messages, req.max_tokens)
+        return ChatResponse(
+            success=True, content=result.content, model=result.model, usage=result.usage,
+            latency_ms=int((time.time() - start) * 1000), raw_response=result.raw_response
+        )
+    except Exception as e:
+        return ChatResponse(success=False, latency_ms=int((time.time() - start) * 1000), message=format_error(e))
+
+
+@app.post("/models", response_model=FetchModelsResponse, tags=["Proxy"])
 async def fetch_models(req: FetchModelsRequest):
-    """
-    获取 Provider 的模型列表
-    代理 /v1/models 端点
-    """
-    provider = PROVIDER_CONFIG.get(req.provider_id, {})
-    base_url = req.base_url or provider.get("base_url", "")
-    
-    if not base_url:
-        raise HTTPException(status_code=400, detail=f"Unknown provider: {req.provider_id}")
-    
+    """获取模型列表"""
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            headers = {}
-            if req.api_key:
-                headers["Authorization"] = f"Bearer {req.api_key}"
+        strategy = get_strategy(req.api_format)
+        if not strategy.supports_models_api:
+            return FetchModelsResponse(success=False, models=[], message=f"{req.api_format} 不支持动态获取模型列表")
+        
+        async with httpx.AsyncClient(timeout=TIMEOUT_MODELS) as client:
+            models = await strategy.fetch_models(client, req.base_url, req.api_key or "")
             
-            response = await client.get(f"{base_url}/models", headers=headers)
-            response.raise_for_status()
+            # 按创建时间倒序排列（新的在前）
+            models_sorted = sorted(
+                models,
+                key=lambda m: m.get('created', 0) if isinstance(m, dict) else 0,
+                reverse=True
+            )
             
-            data = response.json()
-            
-            # 标准化模型列表格式
-            models = []
-            if "data" in data:
-                for m in data["data"]:
-                    try:
-                        model_id = m.get("id") or ""
-                        if not model_id:
-                            continue
-                        # 从 id 提取友好名称: openai/gpt-4o → GPT-4o
-                        name = model_id.split("/")[-1] if "/" in model_id else model_id
-                        # 美化名称: gpt-4o → GPT-4o
-                        name = name.replace("-", " ").replace("_", " ").title()
-                        models.append({
-                            "id": model_id,
-                            "name": name or model_id,
-                        })
-                    except Exception:
-                        # 单个模型解析失败，跳过
-                        continue
-            
-            return {"success": True, "models": models}
-            
+            return FetchModelsResponse(success=True, models=models_sorted)
     except Exception as e:
-        return {"success": False, "message": str(e), "models": []}
+        return FetchModelsResponse(success=False, models=[], message=format_error(e))
 
 
-# ============ 内部函数 ============
-
-async def _test_openai_format(client: httpx.AsyncClient, base_url: str, api_key: str, model: str):
-    """OpenAI 兼容格式测试"""
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": model,
-        "messages": [{"role": "user", "content": "Hi"}],
-        "max_tokens": 5,
-    }
-    
-    response = await client.post(f"{base_url}/chat/completions", headers=headers, json=payload)
-    response.raise_for_status()
-    return response.json()
-
-
-async def _test_anthropic_format(client: httpx.AsyncClient, base_url: str, api_key: str, model: str):
-    """Anthropic 格式测试"""
-    headers = {
-        "x-api-key": api_key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": model,
-        "messages": [{"role": "user", "content": "Hi"}],
-        "max_tokens": 5,
-    }
-    
-    response = await client.post(f"{base_url}/messages", headers=headers, json=payload)
-    response.raise_for_status()
-    return response.json()
-
-
-async def _test_gemini_format(client: httpx.AsyncClient, base_url: str, api_key: str, model: str):
-    """Gemini 格式测试"""
-    url = f"{base_url}/models/{model}:generateContent?key={api_key}"
-    payload = {
-        "contents": [{"parts": [{"text": "Hi"}]}],
-        "generationConfig": {"maxOutputTokens": 5},
-    }
-    
-    response = await client.post(url, json=payload)
-    response.raise_for_status()
-    return response.json()
-
-
-# ============ 启动 ============
+# ============================================================================
+# 启动
+# ============================================================================
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting AI Provider Proxy Server...")
-    print("📍 http://localhost:8000")
-    print("📍 Docs: http://localhost:8000/docs")
+    print("🚀 AI Provider Proxy @ http://localhost:8000")
+    print(f"📋 Formats: {', '.join(STRATEGY_REGISTRY.keys())}")
     uvicorn.run(app, host="0.0.0.0", port=8000)

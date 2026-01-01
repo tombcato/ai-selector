@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type Dispatch, type SetStateAction } from 'react';
 import {
     testConnection,
-    fetchModels,
     createConfigStorage,
     resolveProviderConfig,
     type Model,
@@ -23,7 +22,30 @@ export interface UseAIConfigOptions {
     onDeserialize?: (data: string) => any;
 }
 
-export function useAIConfig(options: UseAIConfigOptions = {}) {
+export interface UseAIConfigReturn {
+    config: AIConfig;
+    providerId: string;
+    apiKey: string;
+    model: string;
+    baseUrl: string;
+    models: Model[];
+    testStatus: 'idle' | 'testing' | 'success' | 'error';
+    testResult: TestConnectionResult | null;
+    isFetchingModels: boolean;
+    fetchModelError: string | null;
+    provider: Provider | null;
+    providers: Provider[];
+    isValid: boolean;
+    setProviderId: (id: string) => void;
+    setApiKey: Dispatch<SetStateAction<string>>;
+    setModel: Dispatch<SetStateAction<string>>;
+    setBaseUrl: Dispatch<SetStateAction<string>>;
+    runTest: () => Promise<TestConnectionResult | undefined>;
+    save: () => void;
+    clear: () => void;
+}
+
+export function useAIConfig(options: UseAIConfigOptions = {}): UseAIConfigReturn {
     const [providerId, setProviderId] = useState<string>(options.initialConfig?.providerId || '');
     const [apiKey, setApiKey] = useState<string>(options.initialConfig?.apiKey || '');
     const [model, setModel] = useState<string>(options.initialConfig?.model || '');
@@ -32,6 +54,8 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     const [models, setModels] = useState<Model[]>([]);
     const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
     const [testResult, setTestResult] = useState<TestConnectionResult | null>(null);
+    const [isFetchingModels, setIsFetchingModels] = useState(false);
+    const [fetchModelError, setFetchModelError] = useState<string | null>(null);
 
     // Resolve provider config
     const resolvedConfig = useMemo(
@@ -50,60 +74,99 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         deserialize: options.onDeserialize
     }), [options.onSerialize, options.onDeserialize]);
 
+    // In-memory model cache: key = `${providerId}|${baseUrl}|${apiKey}`
+    const modelCacheRef = useRef<Map<string, Model[]>>(new Map());
+
     // Load config from storage on mount
     useEffect(() => {
         const saved = storage.load();
         if (saved) {
-            // Only load if the provider exists in current config
-            if (saved.providerId && allProviders.some(p => p.id === saved.providerId)) {
-                setProviderId(saved.providerId);
-                if (saved.apiKey) setApiKey(saved.apiKey);
-                if (saved.model) setModel(saved.model);
-                if (saved.baseUrl) setBaseUrl(saved.baseUrl);
-            }
+            if (saved.providerId) setProviderId(saved.providerId);
+            if (saved.apiKey) setApiKey(saved.apiKey);
+            if (saved.model) setModel(saved.model);
+            if (saved.baseUrl) setBaseUrl(saved.baseUrl);
         }
-    }, [storage, allProviders]);
+    }, [storage]);
 
-    // Fetch models when provider/auth changes
+    // Update models (with caching)
     useEffect(() => {
-        if (!provider) {
+        if (!providerId || !provider) {
             setModels([]);
+            setFetchModelError(null);
+            setIsFetchingModels(false);
             return;
         }
 
-        // First try to get custom models from config
-        const customModels = resolvedConfig.getModels(provider.id);
+        const shouldFetch = provider.supportsModelsApi && (!provider.needsApiKey || !!apiKey);
+        const actualBaseUrl = baseUrl || provider.baseUrl;
+        const cacheKey = `${providerId}|${actualBaseUrl}|${apiKey}`;
 
-        // Don't fetch if we need a key but don't have one
-        if (provider.authType !== 'none' && !apiKey) {
-            setModels(customModels);
+        // Check cache first
+        const cachedModels = modelCacheRef.current.get(cacheKey);
+        if (cachedModels) {
+            setModels(cachedModels);
+            setFetchModelError(null);
+            setIsFetchingModels(false);
             return;
         }
 
-        // If we have custom models and provider doesn't support API, use them
-        if (customModels.length > 0 && !provider.supportsModelsApi) {
-            setModels(customModels);
+        if (!shouldFetch) {
+            // Use static models immediately
+            const staticModels = resolvedConfig.getModels(providerId);
+            setModels(staticModels);
+            modelCacheRef.current.set(cacheKey, staticModels);
+            setFetchModelError(null);
+            setIsFetchingModels(false);
             return;
         }
 
-        const loadModels = async () => {
-            const fetched = await fetchModels({
-                provider,
-                apiKey,
-                baseUrl,
-                proxyUrl: options.proxyUrl
-            });
-            // If fetch returns empty, fall back to custom/static models
-            setModels(fetched.length > 0 ? fetched : customModels);
+        // Set fetching immediately to fill debounce gap
+        setIsFetchingModels(true);
+        setFetchModelError(null);
+
+        const fetchList = async () => {
+            try {
+                const fetchedModels = await import('@ai-selector/core').then(m => m.fetchModels({
+                    provider,
+                    apiKey,
+                    baseUrl: actualBaseUrl,
+                    proxyUrl: options.proxyUrl,
+                    fallbackToStatic: false
+                }));
+                setModels(fetchedModels);
+                modelCacheRef.current.set(cacheKey, fetchedModels);
+            } catch (e) {
+                console.warn('Model fetch failed:', e);
+                setFetchModelError('fetchModelsFailed');
+                const fallbackModels = resolvedConfig.getModels(providerId);
+                setModels(fallbackModels);
+                // Don't cache failed results
+            } finally {
+                setIsFetchingModels(false);
+            }
         };
 
-        loadModels();
-    }, [provider, apiKey, baseUrl, options.proxyUrl, resolvedConfig]);
+        // Debounce for apiKey changes
+        const timer = setTimeout(fetchList, 500);
+        return () => clearTimeout(timer);
+    }, [providerId, provider, apiKey, baseUrl, resolvedConfig, options.proxyUrl]);
+
+    // ... (rest of hook)
+
+
+
+    // Reset test status when apiKey/baseUrl changes while in error state
+    useEffect(() => {
+        if (testStatus === 'error' || testStatus === 'success') {
+            setTestStatus('idle');
+            setTestResult(null);
+        }
+    }, [apiKey, baseUrl]);
 
     // Test connection
     const runTest = useCallback(async () => {
         if (!provider) return;
-        if (provider.authType !== 'none' && !apiKey) return;
+        if (provider.needsApiKey && !apiKey) return;
 
         setTestStatus('testing');
         setTestResult(null);
@@ -116,8 +179,14 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
             proxyUrl: options.proxyUrl
         });
 
-        setTestStatus(result.success ? 'success' : 'error');
         setTestResult(result);
+        setTestStatus(result.success ? 'success' : 'error');
+
+        // Auto-revert status to idle (always 2s)
+        setTimeout(() => {
+            setTestStatus('idle');
+        }, 2000);
+
         return result;
     }, [provider, apiKey, baseUrl, model, options.proxyUrl]);
 
@@ -148,7 +217,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     // Derived state
     const isValid = useMemo(() => {
         if (!providerId || !model) return false;
-        if (provider?.authType !== 'none' && !apiKey) return false;
+        if (provider?.needsApiKey && !apiKey) return false;
         return true;
     }, [providerId, model, provider, apiKey]);
 
@@ -170,6 +239,8 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         models,
         testStatus,
         testResult,
+        isFetchingModels,
+        fetchModelError,
         provider,
         providers: allProviders,
         isValid,

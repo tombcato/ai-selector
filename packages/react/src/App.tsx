@@ -1,10 +1,68 @@
-import { useState, useEffect } from 'react'
-import { AIConfigForm } from './index'
-import type { AIConfig, TestConnectionResult, ProviderConfig } from '@ai-selector/core'
+import { useState, useEffect, useRef } from 'react'
+import { AIConfigForm, useAIConfig } from './index'
+import customProviders from './custom-providers.json';
+import type { AIConfig, TestConnectionResult, ProviderConfig, CustomProviderDefinition } from '@ai-selector/core'
 
 // 示例配置
 const providerConfig: ProviderConfig = {
-    mode: 'default',
+    mode: 'default', // 可选值: 'default' | 'customOnly'
+    // custom: customProviders as Record<string, CustomProviderDefinition>, //导入自定义provider
+
+    // ========================================================================
+    // 场景 1: 只显示指定的 Provider (白名单过滤)
+    // ========================================================================
+    // include: ['openai', 'anthropic'],
+    // exclude: ['gemini'], // 或者使用黑名单过滤
+
+    // ========================================================================
+    // 场景 2: 覆盖/添加自定义 Provider
+    // ========================================================================
+    // custom: {
+    //     // 覆盖内置配置
+    //     openai: {
+    //         name: 'Enterprise OpenAI',
+    //         baseUrl: 'https://gateway.company.com/openai/v1',
+    //         apiFormat: 'openai',
+    //         needsApiKey: true,
+    //         models: [{ id: 'gpt-4o', name: 'GPT-4o' }]
+    //     },
+    //     // 添加新厂商
+    //     deepseeksssss: {
+    //         name: 'DeepSeekssssss',
+    //         baseUrl: 'https://api.deepseek.com',
+    //         apiFormat: 'openai',
+    //         needsApiKey: true,
+    //         icon: 'https://avatars.githubusercontent.com/u/148330874',
+    //         models: [{ id: 'deepseek-chat', name: 'DeepSeek Chat' }]
+    //     }
+    // },
+
+
+    // ========================================================================
+    // 场景 3: 仅显示自定义 Provider
+    // ========================================================================
+    // mode: 'customOnly',
+    // custom: {
+    //     'my-private-model': {
+    //         name: 'Internal AI',
+    //         baseUrl: 'http://localhost:8080/v1',
+    //         apiFormat: 'openai',
+    //         needsApiKey: false,
+    //         icon: 'https://placehold.co/32x32?text=INT',
+    //         models: [
+    //             { id: 'llama-3-8b', name: 'Llama 3 8B' },
+    //             { id: 'mistral-7b', name: 'Mistral 7B' }
+    //         ]
+    //     }
+    // }
+}
+
+const PROXY_URL = 'http://localhost:8000'
+
+// 聊天消息类型
+interface Message {
+    role: 'user' | 'assistant'
+    content: string
 }
 
 function App() {
@@ -21,7 +79,7 @@ function App() {
 
     const handleSave = (config: AIConfig) => {
         console.log('配置已保存:', config)
-        alert('配置已保存！')
+        setConfigVersion(v => v + 1)  // 触发 ChatDemo 刷新
     }
 
     const handleTestResult = (result: TestConnectionResult) => {
@@ -33,10 +91,11 @@ function App() {
     }
 
     const [lang, setLang] = useState<'zh' | 'en'>('zh');
+    const [configVersion, setConfigVersion] = useState(0);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 transition-colors">
-            <div className="max-w-2xl mx-auto p-8 space-y-8">
+            <div className="max-w-xl mx-auto p-8 space-y-8">
                 <header className="flex items-center justify-between border-b border-gray-200 dark:border-zinc-800 pb-4 mb-8">
                     <div>
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-indigo-700 bg-clip-text text-transparent">
@@ -73,11 +132,10 @@ function App() {
 
                 <AIConfigForm
                     language={lang}
-                    proxyUrl="http://localhost:8000"
+                    proxyUrl={PROXY_URL}
                     config={providerConfig}
                     title="AI 配置"
                     showPreview
-                    saveButtonText="保存配置"
                     onSave={handleSave}
                     onTestResult={handleTestResult}
                     onChange={handleChange}
@@ -88,6 +146,171 @@ function App() {
                     <p>📦 支持通过 JSON 配置自定义 Providers</p>
                     <p>🎨 使用共享样式系统，React/Vue 样式统一</p>
                 </div>
+
+                {/* 对话测试区域 */}
+                <ChatDemo key={configVersion} proxyUrl={PROXY_URL} />
+            </div>
+        </div>
+    )
+}
+
+// ============================================================================
+// 对话测试组件
+// ============================================================================
+
+function ChatDemo({ proxyUrl }: { proxyUrl: string }) {
+    const aiConfig = useAIConfig({ proxyUrl })
+    const [messages, setMessages] = useState<Message[]>([])
+    const [input, setInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    // 自动滚动到底部
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
+
+    const canSend = aiConfig.isValid && input.trim() && !isLoading
+
+    const handleSend = async () => {
+        if (!canSend) return
+
+        const userMessage = input.trim()
+        setInput('')
+        setError(null)
+
+        // 添加用户消息
+        const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }]
+        setMessages(newMessages)
+        setIsLoading(true)
+
+        try {
+            const response = await fetch(`${proxyUrl}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    provider_id: aiConfig.providerId,
+                    api_key: aiConfig.apiKey,
+                    model: aiConfig.model,
+                    base_url: aiConfig.config.baseUrl,
+                    api_format: aiConfig.provider?.apiFormat || 'openai',
+                    messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+                    max_tokens: 2048,
+                }),
+            })
+
+            const data = await response.json()
+
+            if (data.success && data.content) {
+                setMessages([...newMessages, { role: 'assistant', content: data.content }])
+            } else {
+                setError(data.message || '请求失败')
+            }
+        } catch (e) {
+            setError(e instanceof Error ? e.message : '网络错误')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+        }
+    }
+
+    const clearChat = () => {
+        setMessages([])
+        setError(null)
+    }
+
+    return (
+        <div className="border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800">
+                <h2 className="font-semibold text-sm">💬 对话测试</h2>
+                <div className="flex items-center gap-2">
+                    {aiConfig.isValid ? (
+                        <span className="text-xs text-green-600 dark:text-green-400">
+                            ✓ {aiConfig.provider?.name} / {aiConfig.model}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-400">请先完成上方配置</span>
+                    )}
+                    {messages.length > 0 && (
+                        <button
+                            onClick={clearChat}
+                            className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+                        >
+                            清空
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Messages */}
+            <div className="chat-messages h-80 overflow-y-auto p-4 space-y-4 bg-white dark:bg-zinc-950">
+                {messages.length === 0 && (
+                    <div className="h-full flex items-center justify-center text-gray-400 dark:text-zinc-600 text-sm">
+                        {aiConfig.isValid ? '输入消息开始对话...' : '请先在上方配置 Provider 和 Model'}
+                    </div>
+                )}
+                {messages.map((msg, i) => (
+                    <div
+                        key={i}
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                        <div
+                            className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${msg.role === 'user'
+                                ? 'bg-blue-500 text-white rounded-br-md'
+                                : 'bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100 rounded-bl-md'
+                                }`}
+                        >
+                            {msg.content}
+                        </div>
+                    </div>
+                ))}
+                {isLoading && (
+                    <div className="flex justify-start">
+                        <div className="bg-gray-100 dark:bg-zinc-800 px-4 py-2 rounded-2xl rounded-bl-md">
+                            <div className="flex gap-1">
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {error && (
+                    <div className="text-center text-red-500 text-sm">
+                        {error}
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="flex gap-2 p-3 bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800">
+                <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={aiConfig.isValid ? "输入消息... (Enter 发送)" : "请先完成配置"}
+                    disabled={!aiConfig.isValid || isLoading}
+                    rows={1}
+                    className="flex-1 px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl resize-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                />
+                <button
+                    onClick={handleSend}
+                    disabled={!canSend}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-zinc-700 text-white rounded-xl transition-colors disabled:cursor-not-allowed"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                </button>
             </div>
         </div>
     )

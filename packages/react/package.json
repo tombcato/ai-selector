@@ -11,10 +11,13 @@
         "react-dom": ">=18.0.0"
     },
     "dependencies": {
-        "@ai-selector/core": "workspace:*"
+        "@ai-selector/core": "workspace:*",
+        "@tombcato/smart-ticker": "^1.0.4"
     },
     "devDependencies": {
+        "@types/node": "^25.0.3",
         "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.3.7",
         "@vitejs/plugin-react": "^4.2.0",
         "autoprefixer": "^10.4.16",
         "postcss": "^8.4.32",

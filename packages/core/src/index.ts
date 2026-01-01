@@ -11,7 +11,7 @@ export type {
     Provider,
     Model,
     AIConfig,
-    AuthType,
+
     ApiFormat,
     TestConnectionOptions,
     TestConnectionResult,
@@ -26,6 +26,8 @@ export type {
 // Providers
 export {
     PROVIDERS,
+    PROVIDER_ID,
+    type ProviderId,
     getProvider,
     getAllProviders,
     getProvidersByFormat
@@ -49,9 +51,18 @@ export {
     createConfigStorage
 } from './storage';
 
+
+
 // Config Resolution
 export {
     resolveProviderConfig,
     getProviderFromConfig,
     type ResolvedConfig
 } from './config';
+
+// Strategies
+export {
+    type ProviderStrategy,
+    strategyRegistry,
+    getStrategy
+} from './strategies';

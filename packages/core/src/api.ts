@@ -11,6 +11,7 @@ import type {
     FetchModelsOptions
 } from './types';
 import { getStaticModels } from './models';
+import { getStrategy, defaultParseModelsResponse } from './strategies';
 
 const DEFAULT_TIMEOUT = 30000;
 
@@ -31,8 +32,8 @@ export async function testConnection(options: TestConnectionOptions): Promise<Te
                 body: JSON.stringify({
                     provider_id: provider.id,
                     api_key: apiKey,
-                    model: model || undefined,
-                    base_url: baseUrl || undefined,
+                    model: model || '',
+                    base_url: baseUrl || provider.baseUrl,
                     api_format: provider.apiFormat,
                 }),
             });
@@ -45,10 +46,21 @@ export async function testConnection(options: TestConnectionOptions): Promise<Te
         }
 
         // Direct API call (for browser-compatible providers)
-        // Note: Most providers don't support CORS, so proxy is recommended
-        const headers = buildHeaders(provider, apiKey);
-        const testPayload = buildTestPayload(provider, model);
-        const endpoint = getTestEndpoint(provider, actualBaseUrl, apiKey, model);
+        const strategy = getStrategy(provider.apiFormat);
+        const targetModel = model || '';
+
+        // If no model provided, we cannot test (user must select model first)
+        if (!targetModel) {
+            return {
+                success: false,
+                latencyMs: 0,
+                message: '请先选择模型 (Please select a model)'
+            };
+        }
+
+        const headers = strategy.buildHeaders(apiKey);
+        const testPayload = strategy.buildTestPayload(targetModel);
+        const endpoint = strategy.getTestEndpoint(actualBaseUrl, apiKey, targetModel);
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -81,7 +93,7 @@ export async function testConnection(options: TestConnectionOptions): Promise<Te
  * Fetch available models from a provider
  */
 export async function fetchModels(options: FetchModelsOptions): Promise<Model[]> {
-    const { provider, apiKey, baseUrl, proxyUrl } = options;
+    const { provider, apiKey, baseUrl, proxyUrl, fallbackToStatic = true } = options;
 
     // If proxy URL is provided, use it
     if (proxyUrl) {
@@ -92,7 +104,7 @@ export async function fetchModels(options: FetchModelsOptions): Promise<Model[]>
                 body: JSON.stringify({
                     provider_id: provider.id,
                     api_key: apiKey || undefined,
-                    base_url: baseUrl || undefined,
+                    base_url: baseUrl || provider.baseUrl,
                 }),
             });
             const data = await response.json();
@@ -101,92 +113,41 @@ export async function fetchModels(options: FetchModelsOptions): Promise<Model[]>
             }
         } catch (error) {
             console.warn('Failed to fetch models via proxy:', error);
+            if (!fallbackToStatic) throw error;
         }
+    }
+
+    // Direct API call
+    if (!proxyUrl && provider.supportsModelsApi) {
+        try {
+            const strategy = getStrategy(provider.apiFormat);
+            if (strategy.getModelsEndpoint) {
+                const endpoint = strategy.getModelsEndpoint(baseUrl || provider.baseUrl, apiKey || '');
+                const headers = strategy.buildHeaders(apiKey || '');
+
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    headers
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const parser = strategy.parseModelsResponse || defaultParseModelsResponse;
+                    return parser(data);
+                } else {
+                    if (!fallbackToStatic) throw new Error(`HTTP ${response.status}`);
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to fetch models directly:', e);
+            if (!fallbackToStatic) throw e;
+        }
+    }
+
+    if (!fallbackToStatic && provider.supportsModelsApi) {
+        throw new Error('Failed to fetch models');
     }
 
     // Fallback to static models
     return getStaticModels(provider.id);
-}
-
-// ============ Helper Functions ============
-
-function buildHeaders(provider: Provider, apiKey: string): Record<string, string> {
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
-
-    switch (provider.authType) {
-        case 'bearer':
-            headers['Authorization'] = `Bearer ${apiKey}`;
-            break;
-        case 'x-api-key':
-            headers['x-api-key'] = apiKey;
-            if (provider.apiFormat === 'anthropic') {
-                headers['anthropic-version'] = '2023-06-01';
-            }
-            break;
-        // query-param and none don't need headers
-    }
-
-    return headers;
-}
-
-function buildTestPayload(provider: Provider, model?: string): Record<string, unknown> {
-    const defaultModel = model || getDefaultModel(provider.id);
-
-    switch (provider.apiFormat) {
-        case 'anthropic':
-            return {
-                model: defaultModel,
-                messages: [{ role: 'user', content: 'Hi' }],
-                max_tokens: 5,
-            };
-        case 'gemini':
-            return {
-                contents: [{ parts: [{ text: 'Hi' }] }],
-                generationConfig: { maxOutputTokens: 5 },
-            };
-        case 'cohere':
-            return {
-                model: defaultModel,
-                message: 'Hi',
-                max_tokens: 5,
-            };
-        case 'openai':
-        default:
-            return {
-                model: defaultModel,
-                messages: [{ role: 'user', content: 'Hi' }],
-                max_tokens: 5,
-            };
-    }
-}
-
-function getTestEndpoint(provider: Provider, baseUrl: string, apiKey: string, model?: string): string {
-    const defaultModel = model || getDefaultModel(provider.id);
-
-    switch (provider.apiFormat) {
-        case 'anthropic':
-            return `${baseUrl}/messages`;
-        case 'gemini':
-            return `${baseUrl}/models/${defaultModel}:generateContent?key=${apiKey}`;
-        case 'cohere':
-            return `${baseUrl}/chat`;
-        case 'openai':
-        default:
-            return `${baseUrl}/chat/completions`;
-    }
-}
-
-function getDefaultModel(providerId: string): string {
-    const defaults: Record<string, string> = {
-        openai: 'gpt-4o-mini',
-        anthropic: 'claude-3-haiku-20240307',
-        gemini: 'gemini-1.5-flash',
-        deepseek: 'deepseek-chat',
-        groq: 'llama-3.1-8b-instant',
-        mistral: 'mistral-small-latest',
-        openrouter: 'google/gemini-2.0-flash-exp:free',
-    };
-    return defaults[providerId] || '';
 }

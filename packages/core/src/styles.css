@@ -16,7 +16,7 @@
 
     /* 按钮 */
     .apmsu-btn {
-        @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 h-10 px-4 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        @apply inline-flex items-center justify-center rounded-md text-xs font-medium transition-all duration-200 h-10 px-4 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
     }
 
     .apmsu-btn-primary {
@@ -33,38 +33,51 @@
 
     /* 输入框 */
     .apmsu-input {
-        @apply flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-gray-500 dark:placeholder:text-zinc-500 focus:outline-none transition-colors;
+        @apply flex h-11 w-full rounded-lg border bg-gray-100/30 dark:bg-zinc-800/50 px-4 py-2.5 text-sm shadow-sm placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none transition-colors;
     }
 
     .apmsu-input-default {
-        @apply border-gray-200 dark:border-zinc-800 focus:border-zinc-500 dark:focus:border-zinc-400;
+        @apply border-gray-200 dark:border-zinc-700 focus:border-zinc-500 dark:focus:border-zinc-500 hover:border-gray-300 dark:hover:border-zinc-600;
         border-width: 1px;
         /* Ensure border width as preflight is disabled */
     }
 
     .apmsu-input-error {
-        @apply border-red-500 dark:border-red-400 focus-visible:ring-red-500;
+        @apply border-red-500 dark:border-red-500/50 focus-visible:ring-red-500 dark:bg-red-500/5;
         border-width: 1px;
     }
 
     .apmsu-input-success {
-        @apply border-green-500 dark:border-green-600 focus-visible:ring-green-500;
+        @apply border-green-500 dark:border-green-500/50 focus-visible:ring-green-500 dark:bg-green-500/5;
         border-width: 1px;
     }
 
     /* 下拉框 */
     .apmsu-select-trigger {
-        @apply flex h-9 w-full min-w-0 items-center justify-between whitespace-nowrap rounded-md border border-gray-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600;
+        @apply flex h-11 w-full min-w-0 items-center justify-between whitespace-nowrap rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-100/20 dark:bg-zinc-800/50 px-4 py-2.5 text-sm shadow-sm focus:outline-none focus:border-zinc-500 dark:focus:border-zinc-500 hover:border-gray-300 dark:hover:border-zinc-600 transition-colors;
         border-width: 1px;
     }
 
     .apmsu-dropdown {
         @apply absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg;
         border-width: 1px;
+        transform-origin: top;
+        transition: all 0.15s ease-out;
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .apmsu-dropdown-open {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+        visibility: visible;
     }
 
     .apmsu-dropdown-item {
-        @apply w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer;
+        @apply w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all cursor-pointer active:scale-[0.98];
         background: transparent;
         border: none;
         text-align: left;
@@ -76,7 +89,7 @@
 
     /* 标签 */
     .apmsu-label {
-        @apply text-sm font-medium leading-none block mb-1;
+        @apply text-xs font-medium leading-none block mb-2 uppercase tracking-wider text-gray-500 dark:text-zinc-500;
     }
 
     /* 文本 */
@@ -94,7 +107,7 @@
 
     /* 卡片 */
     .apmsu-card {
-        @apply bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-5 space-y-4;
+        @apply bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 space-y-5;
         border-width: 1px;
     }
 
@@ -114,6 +127,26 @@
     /* Provider 图标 - dark mode 反转 */
     .apmsu-provider-icon {
         @apply w-4 h-4 flex-shrink-0;
+    }
+
+    /* 下拉箭头 */
+    .apmsu-chevron {
+        @apply w-4 h-4 opacity-50 flex-shrink-0 transition-transform duration-200;
+    }
+
+    /* Placeholder 文本 */
+    .apmsu-placeholder {
+        @apply text-gray-400 dark:text-zinc-500;
+    }
+
+    /* 表单字段容器 */
+    .apmsu-field {
+        @apply space-y-2;
+    }
+
+    /* 分割线 */
+    .apmsu-divider {
+        @apply border-b border-gray-100 dark:border-zinc-800;
     }
 }
 
@@ -150,15 +183,50 @@
 }
 
 /* 下拉框滚动条 */
-.apmsu-dropdown::-webkit-scrollbar {
+.apmsu-dropdown::-webkit-scrollbar,
+.apmsu-dropdown *::-webkit-scrollbar {
     width: 6px;
 }
 
-.apmsu-dropdown::-webkit-scrollbar-thumb {
+.apmsu-dropdown::-webkit-scrollbar-thumb,
+.apmsu-dropdown *::-webkit-scrollbar-thumb {
     background: rgba(156, 163, 175, 0.4);
     border-radius: 3px;
 }
 
-.dark .apmsu-dropdown::-webkit-scrollbar-thumb {
+.apmsu-dropdown::-webkit-scrollbar-track,
+.apmsu-dropdown *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dark .apmsu-dropdown::-webkit-scrollbar-thumb,
+.dark .apmsu-dropdown *::-webkit-scrollbar-thumb {
     background: rgba(82, 82, 91, 0.5);
+}
+
+@keyframes apmsu-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.apmsu-fade-in {
+    animation: apmsu-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Vue Transition Classes */
+.apmsu-fade-enter-active {
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apmsu-fade-enter-from {
+    opacity: 0;
+}
+
+.apmsu-fade-leave-active {
+    display: none;
 }

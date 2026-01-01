@@ -4,9 +4,10 @@
  */
 
 import type { Model } from './types';
+import { PROVIDER_ID } from './providers';
 
 export const STATIC_MODELS: Record<string, Model[]> = {
-    openai: [
+    [PROVIDER_ID.OPENAI]: [
         { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro' },
         { id: 'gpt-5.2', name: 'GPT-5.2' },
         { id: 'gpt-5', name: 'GPT-5' },
@@ -14,7 +15,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'gpt-5-nano', name: 'GPT-5 Nano' },
         { id: 'gpt-4.1', name: 'GPT-4.1' },
     ],
-    anthropic: [
+    [PROVIDER_ID.ANTHROPIC]: [
         { id: 'claude-opus-4.5-20251101', name: 'Claude Opus 4.5' },
         { id: 'claude-opus-4.5-20251101-thinking', name: 'Claude Opus 4.5 Thinking' },
         { id: 'claude-sonnet-4.5-20250929', name: 'Claude Sonnet 4.5' },
@@ -24,18 +25,18 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'claude-opus-4.1-20250805', name: 'Claude Opus 4.1' },
         { id: 'claude-opus-4.1-20250805-thinking', name: 'Claude Opus 4.1 Thinking' },
     ],
-    gemini: [
+    [PROVIDER_ID.GEMINI]: [
         { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview' },
         { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview' },
         { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
         { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
         { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite' },
     ],
-    deepseek: [
+    [PROVIDER_ID.DEEPSEEK]: [
         { id: 'deepseek-chat', name: 'Deepseek Chat' },
         { id: 'deepseek-reasoner', name: 'Deepseek Reasoner' },
     ],
-    mistral: [
+    [PROVIDER_ID.MISTRAL]: [
         { id: 'mistral-large-latest', name: 'Mistral Large' },
         { id: 'mistral-medium-latest', name: 'Mistral Medium' },
         { id: 'mistral-small-latest', name: 'Mistral Small' },
@@ -47,7 +48,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'ministral-8b-latest', name: 'Ministral 8B' },
         { id: 'ministral-3b-latest', name: 'Ministral 3B' },
     ],
-    groq: [
+    [PROVIDER_ID.GROQ]: [
         { id: 'canopylabs/orpheus-v1-english', name: 'Orpheus V1 English' },
         { id: 'canopylabs/orpheus-arabic-saudi', name: 'Orpheus Arabic Saudi' },
         { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct' },
@@ -58,7 +59,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'groq/compound', name: 'Compound' },
         { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B 128E Instruct' },
     ],
-    xai: [
+    [PROVIDER_ID.XAI]: [
         { id: 'grok-4', name: 'Grok 4' },
         { id: 'grok-4-fast', name: 'Grok 4 Fast' },
         { id: 'grok-3-latest', name: 'Grok 3' },
@@ -67,7 +68,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'grok-3-mini-fast', name: 'Grok 3 Mini Fast' },
         { id: 'grok-vision-beta', name: 'Grok Vision (Beta)' },
     ],
-    together: [
+    [PROVIDER_ID.TOGETHER]: [
         { id: 'Qwen/Qwen2.5-72B-Instruct-Turbo', name: 'Qwen2.5 72B Instruct Turbo' },
         { id: 'Qwen/Qwen3-235B-A22B-Thinking-2507', name: 'Qwen3 235B A22B Thinking 2507' },
         { id: 'deepseek-ai/DeepSeek-R1', name: 'Deepseek R1' },
@@ -76,7 +77,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', name: 'Llama 3.3 70B Instruct Turbo' },
         { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free', name: 'Llama 3.3 70B Instruct Turbo Free' },
     ],
-    fireworks: [
+    [PROVIDER_ID.FIREWORKS]: [
         { id: 'accounts/fireworks/models/llama4-scout-instruct-basic', name: 'Llama4 Scout Instruct Basic' },
         { id: 'accounts/fireworks/models/qwen3-vl-235b-a22b-thinking', name: 'Qwen3 Vl 235B A22B Thinking' },
         { id: 'accounts/fireworks/models/deepseek-v3p2', name: 'Deepseek V3P2' },
@@ -88,7 +89,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'accounts/fireworks/models/qwen3-235b-a22b-thinking-2507', name: 'Qwen3 235B A22B Thinking 2507' },
         { id: 'accounts/fireworks/models/qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B A35B Instruct' },
     ],
-    deepinfra: [
+    [PROVIDER_ID.DEEPINFRA]: [
         { id: 'meta-llama/Llama-3.2-11B-Vision-Instruct', name: 'Llama 3.2 11B Vision Instruct' },
         { id: 'Qwen/Qwen3-32B', name: 'Qwen3 32B' },
         { id: 'NousResearch/Hermes-3-Llama-3.1-70B', name: 'Hermes 3 Llama 3.1 70B' },
@@ -100,7 +101,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct', name: 'Meta Llama 3.1 8B Instruct' },
         { id: 'Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo', name: 'Qwen3 Coder 480B A35B Instruct Turbo' },
     ],
-    openrouter: [
+    [PROVIDER_ID.OPENROUTER]: [
         { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash Preview' },
         { id: 'mistralai/mistral-small-creative', name: 'Mistral Small Creative' },
         { id: 'openai/gpt-5.2-chat', name: 'Gpt 5.2 Chat' },
@@ -114,7 +115,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'mistralai/mistral-large-2512', name: 'Mistral Large 2512' },
         { id: 'deepseek/deepseek-v3.2-speciale', name: 'Deepseek V3.2 Speciale' },
     ],
-    perplexity: [
+    [PROVIDER_ID.PERPLEXITY]: [
         { id: 'codellama-34b-instruct', name: 'Codellama 34B Instruct' },
         { id: 'codellama-70b-instruct', name: 'Codellama 70B Instruct' },
         { id: 'llama-2-70b-chat', name: 'Llama 2 70B Chat' },
@@ -125,21 +126,21 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'llama-3.1-sonar-large-128k-online', name: 'Llama 3.1 Sonar Large 128K Online' },
         { id: 'llama-3.1-sonar-small-128k-chat', name: 'Llama 3.1 Sonar Small 128K Chat' },
     ],
-    cohere: [
+    [PROVIDER_ID.COHERE]: [
         { id: 'command-a-vision-07-2025', name: 'Command A Vision 07 2025' },
         { id: 'command-a-reasoning-08-2025', name: 'Command A Reasoning 08 2025' },
         { id: 'command-r-08-2024', name: 'Command R 08 2024' },
         { id: 'command-r7b-arabic-02-2025', name: 'Command R7B Arabic 02 2025' },
         { id: 'command-r7b-12-2024', name: 'Command R7B 12 2024' },
     ],
-    moonshot: [
+    [PROVIDER_ID.MOONSHOT]: [
         { id: 'moonshot-v1-128k', name: 'Moonshot 128K' },
         { id: 'moonshot-v1-32k', name: 'Moonshot 32K' },
         { id: 'moonshot-v1-8k', name: 'Moonshot 8K' },
         { id: 'kimi-k2-0711-chat', name: 'Kimi K2 Chat' },
         { id: 'moonshot-v1-auto', name: 'Moonshot Auto' },
     ],
-    qwen: [
+    [PROVIDER_ID.QWEN]: [
         { id: 'qwen-flash', name: 'Qwen Flash' },
         { id: 'qwen3-vl-plus-2025-12-19', name: 'Qwen3 Vl Plus 2025 12 19' },
         { id: 'qwen3-tts-vd-realtime-2025-12-16', name: 'Qwen3 Tts Vd Realtime 2025 12 16' },
@@ -151,13 +152,13 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'qwen-plus-2025-12-01', name: 'Qwen Plus 2025 12 01' },
         { id: 'qwen3-tts-vc-realtime-2025-11-27', name: 'Qwen3 Tts Vc Realtime 2025 11 27' },
     ],
-    zhipu: [
+    [PROVIDER_ID.ZHIPU]: [
         { id: 'glm-4.5', name: 'Glm 4.5' },
         { id: 'glm-4.5-air', name: 'Glm 4.5 Air' },
         { id: 'glm-4.6', name: 'Glm 4.6' },
         { id: 'glm-4.7', name: 'Glm 4.7' },
     ],
-    siliconflow: [
+    [PROVIDER_ID.SILICONFLOW]: [
         { id: 'deepseek-ai/DeepSeek-V3.2', name: 'Deepseek V3.2' },
         { id: 'deepseek-ai/DeepSeek-V3.1-Terminus', name: 'Deepseek V3.1 Terminus' },
         { id: 'deepseek-ai/DeepSeek-R1', name: 'Deepseek R1' },
@@ -167,7 +168,7 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'Pro/zai-org/GLM-4.7', name: 'Glm 4.7' },
         { id: 'Qwen/Qwen3-VL-32B-Instruct', name: 'Qwen3 Vl 32B Instruct' },
     ],
-    ollama: [
+    [PROVIDER_ID.OLLAMA]: [
         { id: 'llama3.3', name: 'Llama 3.3' },
         { id: 'llama3.2', name: 'Llama 3.2' },
         { id: 'qwq', name: 'QwQ (推理)' },
@@ -178,6 +179,18 @@ export const STATIC_MODELS: Record<string, Model[]> = {
         { id: 'mistral:7b', name: 'Mistral 7B' },
         { id: 'phi4', name: 'Phi 4' },
         { id: 'codellama', name: 'Code Llama' },
+    ],
+    [PROVIDER_ID.DOUBAO]: [
+        { id: 'doubao-seed-1-8-251215', name: 'Doubao 1.8' },
+        { id: "doubao-seed-1-6-251015",name: "Doubao 1.6"},
+        { id: 'doubao-seed-1-6-lite-251015', name: 'Doubao 1.6 Lite' },
+        { id: 'doubao-seed-1-6-flash-250828', name: 'Doubao 1.6 Flash' },
+        { id: 'doubao-seed-1-6-thinking-250615', name: 'Doubao 1.6 Thinking' },
+    ],
+    [PROVIDER_ID.MINIMAX]: [
+        { id: 'MiniMax-M2.1', name: 'MiniMax M2.1' },
+        { id: 'MiniMax-M2.1-lightning', name: 'MiniMax M2.1 Lightning' },
+        { id: 'MiniMax-M2', name: 'MiniMax M2' },
     ],
 };
 

@@ -53,12 +53,27 @@ export function resolveProviderConfig(config?: ProviderConfig): ResolvedConfig {
                 id,
                 name: def.name,
                 baseUrl: def.baseUrl,
-                authType: def.authType,
+                needsApiKey: def.needsApiKey,
                 apiFormat: def.apiFormat,
                 supportsModelsApi: def.supportsModelsApi ?? false,
                 icon: def.icon,
             };
-            providers.push(customProvider);
+
+            // Check if provider already exists (for override)
+            const existingIndex = providers.findIndex(p => p.id === id);
+
+            if (existingIndex >= 0) {
+                // Merge/Override existing provider
+                // We keep the original icon if custom doesn't provide one
+                providers[existingIndex] = {
+                    ...providers[existingIndex],
+                    ...customProvider,
+                    icon: customProvider.icon || providers[existingIndex].icon
+                };
+            } else {
+                // Add new provider
+                providers.push(customProvider);
+            }
 
             // Store custom models if provided
             if (def.models && def.models.length > 0) {

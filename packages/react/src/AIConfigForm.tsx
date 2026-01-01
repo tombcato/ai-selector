@@ -1,6 +1,10 @@
-import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useAIConfig } from './useAIConfig';
-import { I18N, type Language, type AIConfig, type AIConfigFormProps, type TestConnectionResult, type Provider, type Model } from '@ai-selector/core';
+import { I18N, type Language, type AIConfig, type AIConfigFormProps, type TestConnectionResult } from '@ai-selector/core';
+import { ProviderSelect } from './ProviderSelect';
+import { AuthInput } from './AuthInput';
+import { ModelSelect } from './ModelSelect';
+import { BaseUrlInput } from './BaseUrlInput';
 
 // Re-export props type
 export type { AIConfigFormProps };
@@ -56,6 +60,8 @@ export function AIConfigForm({
         setBaseUrl,
         runTest,
         save,
+        isFetchingModels,
+        fetchModelError,
         config: currentConfig,
     } = useAIConfig({
         proxyUrl,
@@ -67,28 +73,8 @@ export function AIConfigForm({
 
     const [providerOpen, setProviderOpen] = useState(false);
     const [modelOpen, setModelOpen] = useState(false);
-    const [modelSearch, setModelSearch] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
-    const [showBaseUrl, setShowBaseUrl] = useState(false);
-
-    const providerRef = useRef<HTMLDivElement>(null);
-    const modelRef = useRef<HTMLDivElement>(null);
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Click outside handlers
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (providerRef.current && !providerRef.current.contains(e.target as Node)) {
-                setProviderOpen(false);
-            }
-            if (modelRef.current && !modelRef.current.contains(e.target as Node)) {
-                setModelOpen(false);
-                setModelSearch('');
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     // Notify parent of changes
     useEffect(() => {
@@ -102,26 +88,6 @@ export function AIConfigForm({
         }
     }, [testResult, onTestResult]);
 
-    // Auto-test on key change (debounced)
-    useEffect(() => {
-        if (!provider || provider.authType === 'none' || !apiKey || apiKey.length < 3) return;
-
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => {
-            runTest();
-        }, 1000);
-
-        return () => {
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-        };
-    }, [apiKey, provider, runTest]);
-
-    // Filter models
-    const filteredModels = models.filter(m =>
-        m.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
-        m.id.toLowerCase().includes(modelSearch.toLowerCase())
-    );
-
     // Handle save
     const handleSave = useCallback(() => {
         save();
@@ -130,13 +96,6 @@ export function AIConfigForm({
         setTimeout(() => setSaveStatus('idle'), 2000);
     }, [save, onSave, currentConfig]);
 
-    // Get input class based on status
-    const getInputClass = () => {
-        if (testStatus === 'success') return 'apmsu-input apmsu-input-success';
-        if (testStatus === 'error') return 'apmsu-input apmsu-input-error';
-        return 'apmsu-input apmsu-input-default';
-    };
-
     return (
         <div className="apmsu-card">
             {title && (
@@ -144,255 +103,144 @@ export function AIConfigForm({
             )}
 
             <div className="space-y-3">
-                {/* Provider Selector */}
-                <div className="space-y-2" ref={providerRef}>
-                    <label className="apmsu-label">Provider</label>
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => !disabled && setProviderOpen(!providerOpen)}
-                            disabled={disabled}
-                            className="apmsu-select-trigger"
-                        >
-                            {provider ? (
-                                <span className="flex items-center gap-2 min-w-0">
-                                    <img
-                                        src={provider.icon}
-                                        alt={provider.name}
-                                        className="apmsu-provider-icon"
-                                    />
-                                    <span className="truncate">{provider.name}</span>
-                                </span>
-                            ) : (
-                                <span className="text-gray-500 dark:text-zinc-500">{t.selectProvider}</span>
-                            )}
-                            <ChevronIcon />
-                        </button>
+                <ProviderSelect
+                    providers={providers}
+                    selectedProviderId={providerId}
+                    onSelect={setProviderId}
+                    isOpen={providerOpen}
+                    setIsOpen={setProviderOpen}
+                    disabled={disabled}
+                    language={language}
+                />
 
-                        {providerOpen && (
-                            <div className="apmsu-dropdown max-h-[300px] overflow-auto p-1">
-                                {providers.map((p: Provider) => (
-                                    <button
-                                        key={p.id}
-                                        type="button"
-                                        onClick={() => {
-                                            setProviderId(p.id);
-                                            setProviderOpen(false);
-                                        }}
-                                        className={`apmsu-dropdown-item rounded-sm ${providerId === p.id ? 'apmsu-dropdown-item-active' : ''}`}
-                                    >
-                                        <div className="flex items-center gap-2 flex-shrink-0">
-                                            <img
-                                                src={p.icon}
-                                                alt={p.name}
-                                                className="apmsu-provider-icon"
-                                            />
-                                            <span className="font-medium whitespace-nowrap">{p.name}</span>
-                                        </div>
-                                        <span className="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0">
-                                            {p.baseUrl.replace('https://', '')}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Base URL 折叠 */}
-                {provider && (
-                    <>
-                        <button
-                            type="button"
-                            onClick={() => setShowBaseUrl(!showBaseUrl)}
-                            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1 transition-colors"
-                        >
-                            <svg
-                                className={`w-3 h-3 transition-transform ${showBaseUrl ? 'rotate-90' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                            {t.customBaseUrl}
-                        </button>
-
-                        <div
-                            className="grid transition-all duration-200 ease-out"
-                            style={{ gridTemplateRows: showBaseUrl ? '1fr' : '0fr' }}
-                        >
-                            <div className="overflow-hidden">
-                                <input
-                                    type="text"
-                                    value={baseUrl}
-                                    onChange={(e) => setBaseUrl(e.target.value)}
-                                    placeholder={provider.baseUrl}
-                                    disabled={disabled}
-                                    className="apmsu-input apmsu-input-default"
-                                />
-                            </div>
-                        </div>
-                    </>
-                )}
+                <BaseUrlInput
+                    provider={provider}
+                    baseUrl={baseUrl}
+                    onChange={setBaseUrl}
+                    disabled={disabled}
+                    language={language}
+                />
 
                 {/* Auth & Model Collapsible Section */}
                 <div className={`transition-all duration-500 ease-in-out ${providerId ? 'max-h-[1000px] opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                     <div className="space-y-4">
-                        {/* API Key Input (if needed) */}
-                        {provider && provider.authType !== 'none' && (
-                            <div className="space-y-2">
-                                <label className="apmsu-label">API Key</label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                        placeholder={t.apiKeyPlaceholder}
-                                        disabled={disabled}
-                                        className={`${getInputClass()} pr-10`}
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                                        {testStatus === 'testing' && <SpinnerIcon />}
-                                        {testStatus === 'success' && <CheckIcon />}
-                                        {testStatus === 'error' && <ErrorIcon />}
-                                        {testStatus === 'idle' && apiKey && (
-                                            <button
-                                                type="button"
-                                                onClick={() => runTest()}
-                                                className="p-1 -m-1 text-gray-400 dark:text-zinc-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                                                title="点击测试连通性"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </button>
-                                        )}
-                                    </span>
-                                </div>
+                        <AuthInput
+                            provider={provider}
+                            apiKey={apiKey}
+                            onChange={setApiKey}
+                            testStatus={testStatus}
+                            disabled={disabled}
+                            language={language}
+                        />
 
-                                {/* Error Message with Animation */}
-                                <div
-                                    className="grid transition-all duration-200 ease-out"
-                                    style={{ gridTemplateRows: testStatus === 'error' && testResult?.message ? '1fr' : '0fr' }}
-                                >
-                                    <div className="overflow-hidden">
-                                        <div className="pt-1 text-xs space-y-0.5">
-                                            <p className="text-red-500 dark:text-red-400 font-medium">{t.testFailed}</p>
-                                            <p className="text-red-500/80 dark:text-red-400/80 line-clamp-2">{testResult?.message}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Model Selector */}
-                        <div className="space-y-2" ref={modelRef}>
-                            <label className="apmsu-label">Model</label>
-                            <div className="relative">
-                                <button
-                                    type="button"
-                                    onClick={() => !disabled && providerId && setModelOpen(!modelOpen)}
-                                    disabled={disabled || !providerId}
-                                    className="apmsu-select-trigger"
-                                >
-                                    {model ? (
-                                        <span className="truncate">
-                                            {models.find((m: Model) => m.id === model)?.name || model}
-                                        </span>
-                                    ) : (
-                                        <span className="text-gray-500 dark:text-zinc-500">{t.selectModel}</span>
-                                    )}
-                                    <ChevronIcon />
-                                </button>
-
-                                {modelOpen && (
-                                    <div className="apmsu-dropdown">
-                                        <div className="p-1.5 border-b border-gray-100 dark:border-zinc-800">
-                                            <input
-                                                type="text"
-                                                value={modelSearch}
-                                                onChange={(e) => setModelSearch(e.target.value)}
-                                                placeholder={t.searchModel}
-                                                className="apmsu-input apmsu-input-default"
-                                                autoFocus
-                                            />
-                                        </div>
-                                        <div className="max-h-60 overflow-auto">
-                                            {/* Custom model option */}
-                                            {modelSearch && !filteredModels.some(m => m.id === modelSearch) && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setModel(modelSearch);
-                                                        setModelOpen(false);
-                                                        setModelSearch('');
-                                                    }}
-                                                    className="apmsu-dropdown-item bg-blue-50 dark:bg-blue-900/20 border-b"
-                                                >
-                                                    <span className="text-blue-500">{t.useCustom}: {modelSearch}</span>
-                                                </button>
-                                            )}
-                                            {filteredModels.map((m: Model) => (
-                                                <button
-                                                    key={m.id}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setModel(m.id);
-                                                        setModelOpen(false);
-                                                        setModelSearch('');
-                                                    }}
-                                                    className={`apmsu-dropdown-item ${model === m.id ? 'apmsu-dropdown-item-active' : ''}`}
-                                                >
-                                                    <span>{m.name}</span>
-                                                </button>
-                                            ))}
-                                            {filteredModels.length === 0 && !modelSearch && (
-                                                <div className="p-4 text-center apmsu-hint-text">{t.noModels}</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            {!apiKey && provider?.authType !== 'none' && (
-                                <p className="apmsu-hint-text">{t.apiKeyTip}</p>
-                            )}
-                        </div>
+                        <ModelSelect
+                            provider={provider}
+                            models={models}
+                            selectedModelId={model}
+                            onSelect={setModel}
+                            isOpen={modelOpen}
+                            setIsOpen={setModelOpen}
+                            hasApiKey={!!apiKey}
+                            disabled={disabled}
+                            language={language}
+                            isFetchingModels={isFetchingModels}
+                            fetchModelError={fetchModelError}
+                        />
                     </div>
                 </div>
 
-                {/* Save Button */}
-                <div className="pt-2">
-                    <button
-                        onClick={handleSave}
-                        disabled={!isValid || disabled}
-                        className={`apmsu-btn w-full ${saveStatus === 'saved' ? 'apmsu-btn-success' : 'apmsu-btn-primary'}`}
+                {/* Action Buttons */}
+                <div className="pt-2 space-y-2">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => runTest()}
+                            disabled={!providerId || !apiKey || !model || disabled || testStatus === 'testing'}
+                            className={`apmsu-btn flex-1 ${testStatus === 'success' ? 'apmsu-btn-success' :
+                                testStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40' :
+                                    'apmsu-btn-ghost border border-gray-200 dark:border-zinc-700'
+                                }`}
+                        >
+                            {testStatus === 'testing' ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <SpinnerIcon />
+                                    {t.testing}
+                                </span>
+                            ) : testStatus === 'success' ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <CheckIcon />
+                                    {t.testSuccess} {testResult?.latencyMs && `${testResult.latencyMs}ms`}
+                                </span>
+                            ) : testStatus === 'error' ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <ErrorIcon />
+                                    {t.testFailed}
+                                </span>
+                            ) : (
+                                t.testConnection
+                            )}
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={!isValid || disabled}
+                            className={`apmsu-btn flex-1 ${saveStatus === 'saved' ? 'apmsu-btn-success' : 'apmsu-btn-primary'}`}
+                        >
+                            {saveStatus === 'saved' ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    {t.saved}
+                                </span>
+                            ) : (saveButtonText || t.save)}
+                        </button>
+                    </div>
+
+                    {/* Error Message */}
+                    <div
+                        className="grid transition-all duration-200 ease-out"
+                        style={{ gridTemplateRows: (!testResult?.success && testResult?.message && testStatus !== 'testing' && testStatus !== 'success') ? '1fr' : '0fr' }}
                     >
-                        {saveStatus === 'saved' ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                </svg>
-                                {t.saved}
-                            </span>
-                        ) : (saveButtonText || t.save)}
-                    </button>
+                        <div className="overflow-hidden">
+                            <div className="p-2 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <p className="text-xs text-red-600 dark:text-red-400 line-clamp-3 text-left">{testResult?.message}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Config Preview */}
+            {/* Config Preview - Collapsible */}
             {showPreview && provider && (
-                <div className="mt-6 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-4 border border-gray-200/50 dark:border-zinc-800">
-                    <h3 className="text-xs font-medium text-gray-500 dark:text-zinc-500 mb-2 uppercase tracking-wider">{t.preview}</h3>
-                    <pre className="text-xs text-gray-600 dark:text-zinc-400 font-mono overflow-x-auto leading-relaxed">
-                        {JSON.stringify({
-                            provider: provider.name,
-                            apiFormat: provider.apiFormat,
-                            baseUrl: baseUrl || provider.baseUrl,
-                            model: model || t.unselected,
-                            hasApiKey: !!apiKey
-                        }, null, 2)}
-                    </pre>
+                <div className="mt-6 border border-gray-200/50 dark:border-zinc-800 rounded-lg overflow-hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                        <h3 className="text-xs font-medium text-gray-500 dark:text-zinc-500 uppercase tracking-wider">{t.preview}</h3>
+                        <svg
+                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isPreviewOpen ? 'rotate-180' : ''}`}
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div
+                        className="grid transition-all duration-200 ease-out"
+                        style={{ gridTemplateRows: isPreviewOpen ? '1fr' : '0fr' }}
+                    >
+                        <div className="overflow-hidden">
+                            <pre className="text-xs text-gray-600 dark:text-zinc-400 font-mono overflow-x-auto leading-relaxed p-4 bg-zinc-50 dark:bg-zinc-900/50">
+                                {JSON.stringify({
+                                    provider: provider.name,
+                                    apiFormat: provider.apiFormat,
+                                    baseUrl: baseUrl || provider.baseUrl,
+                                    model: model || t.unselected,
+                                    hasApiKey: !!apiKey
+                                }, null, 2)}
+                            </pre>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -400,12 +248,6 @@ export function AIConfigForm({
 }
 
 // Icons
-const ChevronIcon = () => (
-    <svg className="w-4 h-4 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-    </svg>
-);
-
 const SpinnerIcon = () => (
     <svg className="apmsu-icon-spin" viewBox="0 0 24 24" fill="none">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

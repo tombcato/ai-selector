@@ -1,0 +1,18 @@
+{
+    "my-private-model": {
+        "name": "Internal AI (Custom)",
+        "baseUrl": "http://localhost:8080/v1",
+        "apiFormat": "openai",
+        "needsApiKey": false,
+        "models": [
+            {
+                "id": "llama-3-8b",
+                "name": "Llama 3 8B"
+            },
+            {
+                "id": "mistral-7b",
+                "name": "Mistral 7B"
+            }
+        ]
+    }
+}

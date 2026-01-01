@@ -5,17 +5,31 @@
 
 // ============ Provider Types ============
 
-export type AuthType = 'bearer' | 'x-api-key' | 'query-param' | 'none';
+// export type AuthType = 'bearer' | 'x-api-key' | 'query-param' | 'none'; // REMOVED
 export type ApiFormat = 'openai' | 'anthropic' | 'gemini' | 'cohere';
 
 export interface Provider {
     id: string;
     name: string;
     baseUrl: string;
-    authType: AuthType;
+    needsApiKey: boolean;
     apiFormat: ApiFormat;
     supportsModelsApi: boolean;
     icon?: string;
+}
+
+// ...
+
+/** 自定义 Provider 定义 */
+export interface CustomProviderDefinition {
+    name: string;
+    baseUrl: string;
+    needsApiKey: boolean;
+    apiFormat: ApiFormat;
+    supportsModelsApi?: boolean;
+    icon?: string;
+    /** 静态模型列表（当不支持 /models API 时使用） */
+    models?: Model[];
 }
 
 export interface Model {
@@ -53,6 +67,7 @@ export interface FetchModelsOptions {
     apiKey?: string;
     baseUrl?: string;
     proxyUrl?: string;
+    fallbackToStatic?: boolean;
 }
 
 // ============ Storage Types ============
@@ -69,7 +84,7 @@ export interface StorageAdapter {
 export interface CustomProviderDefinition {
     name: string;
     baseUrl: string;
-    authType: AuthType;
+    needsApiKey: boolean;
     apiFormat: ApiFormat;
     supportsModelsApi?: boolean;
     icon?: string;

@@ -1,13 +1,65 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import AIConfigForm from './AIConfigForm.vue';
+import ChatDemo from './ChatDemo.vue';
 import type { AIConfig, TestConnectionResult, ProviderConfig } from '@ai-selector/core';
+
+// 常量
+const PROXY_URL = 'http://localhost:8000';
 
 // 示例配置
 const providerConfig: ProviderConfig = {
-  mode: 'default',
+  mode: 'default', // 可选值: 'default' | 'customOnly'
+
+  // ========================================================================
+  // 场景 1: 只显示指定的 Provider (白名单过滤)
+  // ========================================================================
+  // include: ['openai', 'anthropic'],
+  // exclude: ['gemini'], // 或者使用黑名单
+
+  // ========================================================================
+  // 场景 2: 覆盖/添加自定义 Provider
+  // ========================================================================
+  // custom: {
+  //   // 覆盖内置配置
+  //   openai: {
+  //     name: 'Enterprise OpenAI',
+  //     baseUrl: 'https://gateway.company.com/openai/v1',
+  //     apiFormat: 'openai',
+  //     needsApiKey: true,
+  //     models: [{ id: 'gpt-4o', name: 'GPT-4o' }]
+  //   },
+  //   // 添加新厂商
+  //   deepseek: {
+  //     name: 'DeepSeek',
+  //     baseUrl: 'https://api.deepseek.com',
+  //     apiFormat: 'openai',
+  //     needsApiKey: true,
+  //     icon: 'https://avatars.githubusercontent.com/u/148330874',
+  //     models: [{ id: 'deepseek-chat', name: 'DeepSeek Chat' }]
+  //   }
+  // },
+
+  // ========================================================================
+  // 场景 3: 仅显示自定义 Provider
+  // ========================================================================
+  // mode: 'customOnly',
+  // custom: {
+  //   'my-private-model': {
+  //     name: 'Internal AI',
+  //     baseUrl: 'http://localhost:8080/v1',
+  //     apiFormat: 'openai',
+  //     needsApiKey: false,
+  //     icon: 'https://placehold.co/32x32?text=INT',
+  //     models: [
+  //       { id: 'llama-3-8b', name: 'Llama 3 8B' },
+  //       { id: 'mistral-7b', name: 'Mistral 7B' }
+  //     ]
+  //   }
+  // }
 };
 
+// 主题
 const isDark = ref(false);
 
 onMounted(() => {
@@ -18,6 +70,7 @@ watch(isDark, (dark) => {
   document.documentElement.classList.toggle('dark', dark);
 }, { immediate: true });
 
+// 语言
 const lang = ref<'zh' | 'en'>('zh');
 
 function toggleLang() {
@@ -28,9 +81,12 @@ function toggleTheme() {
   isDark.value = !isDark.value;
 }
 
+// 配置版本 (用于刷新 ChatDemo)
+const configVersion = ref(0);
+
 function handleSave(config: AIConfig) {
   console.log('配置已保存:', config);
-  alert('配置已保存！');
+  configVersion.value++;
 }
 
 function handleTestResult(result: TestConnectionResult) {
@@ -44,7 +100,7 @@ function handleChange(config: Partial<AIConfig>) {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 transition-colors">
-    <div class="max-w-2xl mx-auto p-8 space-y-8">
+    <div class="max-w-xl mx-auto p-8 space-y-8">
       <header class="flex items-center justify-between border-b border-gray-200 dark:border-zinc-800 pb-4 mb-8">
         <div>
           <h1 class="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-700 bg-clip-text text-transparent">
@@ -80,11 +136,10 @@ function handleChange(config: Partial<AIConfig>) {
 
       <AIConfigForm 
         :language="lang" 
-        proxyUrl="http://localhost:8000"
+        :proxyUrl="PROXY_URL"
         :config="providerConfig"
         title="AI 配置"
         showPreview
-        saveButtonText="保存配置"
         @save="handleSave"
         @test-result="handleTestResult"
         @change="handleChange"
@@ -95,6 +150,9 @@ function handleChange(config: Partial<AIConfig>) {
         <p>📦 支持通过 JSON 配置自定义 Providers</p>
         <p>🎨 使用共享样式系统，React/Vue 样式统一</p>
       </div>
+
+      <!-- 对话测试区域 - key 强制刷新 -->
+      <ChatDemo :key="configVersion" :proxyUrl="PROXY_URL" />
     </div>
   </div>
 </template>

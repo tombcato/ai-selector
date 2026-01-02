@@ -23,7 +23,6 @@ const isVisible = ref(false);
 const t = computed(() => I18N[props.language]);
 
 const inputClass = computed(() => {
-  if (props.testStatus === 'success') return 'apmsu-input apmsu-input-success';
   return 'apmsu-input apmsu-input-default';
 });
 </script>

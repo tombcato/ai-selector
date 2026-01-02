@@ -15,7 +15,6 @@ export function AuthInput({
     provider,
     apiKey,
     onChange,
-    testStatus,
     disabled,
     language = 'zh'
 }: AuthInputProps) {
@@ -25,7 +24,6 @@ export function AuthInput({
     if (!provider || !provider.needsApiKey) return null;
 
     const getInputClass = () => {
-        if (testStatus === 'success') return 'apmsu-input apmsu-input-success';
         return 'apmsu-input apmsu-input-default';
     };
 

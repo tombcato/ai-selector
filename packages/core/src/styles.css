@@ -123,6 +123,13 @@
     .apmsu-card {
         @apply bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 space-y-5;
         border-width: 1px;
+        container-type: inline-size;
+    }
+
+    @container (max-width: 350px) {
+        .apmsu-provider-baseurl {
+            display: none;
+        }
     }
 
     /* 图标 */

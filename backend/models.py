@@ -19,7 +19,7 @@ class ChatRequest(BaseModel):
     base_url: str
     api_format: str = "openai"
     messages: Optional[List[Dict[str, str]]] = None
-    max_tokens: int = 1024
+    max_tokens: Optional[int] = None
 
 
 class FetchModelsRequest(BaseModel):

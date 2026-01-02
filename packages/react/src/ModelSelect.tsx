@@ -35,6 +35,15 @@ export function ModelSelect({
     const t = I18N[language];
     const triggerRef = useRef<HTMLDivElement>(null);
     const [modelSearch, setModelSearch] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            setTimeout(() => {
+                searchInputRef.current?.focus();
+            }, 50);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -59,7 +68,6 @@ export function ModelSelect({
             <label className="apmsu-label flex items-center justify-between">
                 <span>{t.modelLabel}</span>
             </label>
-            {/* ... (button and list logic remains mostly same) */}
             <div className="relative">
                 <button
                     type="button"
@@ -73,16 +81,16 @@ export function ModelSelect({
                     />
                     <ChevronIcon isOpen={isOpen} />
                 </button>
-                {/* ... (dropdown content) */}
+
                 <div className={`apmsu-dropdown origin-top ${isOpen ? 'apmsu-dropdown-open' : ''}`}>
                     <div className="p-1.5 apmsu-divider">
                         <input
+                            ref={searchInputRef}
                             type="text"
                             value={modelSearch}
                             onChange={(e) => setModelSearch(e.target.value)}
                             placeholder={t.searchModel}
                             className="apmsu-select-trigger"
-                            autoFocus={isOpen}
                         />
                     </div>
                     <div className="max-h-60 overflow-auto">

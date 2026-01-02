@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { I18N, type Language, type Provider, type Model } from '@tombcato/ai-selector-core';
 import SmartText from './SmartText.vue';
 
@@ -27,7 +27,19 @@ const emit = defineEmits<{
 const isOpen = ref(false);
 const modelSearch = ref('');
 const triggerRef = ref<HTMLDivElement | null>(null);
+const searchInputRef = ref<HTMLInputElement | null>(null);
 const t = computed(() => I18N[props.language]);
+
+// Auto focus search input when opened
+watch(isOpen, async (val) => {
+  if (val) {
+    await nextTick();
+    // Small delay to ensure transition doesn't interfere with focus
+    setTimeout(() => {
+      searchInputRef.value?.focus();
+    }, 50);
+  }
+});
 
 const filteredModels = computed(() =>
   props.models.filter(m =>
@@ -89,11 +101,11 @@ function handleSelect(id: string, name?: string) {
       <div :class="['apmsu-dropdown origin-top', isOpen ? 'apmsu-dropdown-open' : '']">
         <div class="p-1.5 border-b border-gray-100 dark:border-zinc-800">
           <input
+            ref="searchInputRef"
             type="text"
             v-model="modelSearch"
             :placeholder="t.searchModel"
             class="apmsu-select-trigger"
-            :autofocus="isOpen"
           />
         </div>
         <div class="max-h-60 overflow-auto">

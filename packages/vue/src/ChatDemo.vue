@@ -51,7 +51,7 @@ async function sendMessage() {
           base_url: aiConfig.config.value.baseUrl,
           api_format: aiConfig.provider.value?.apiFormat || 'openai',
           messages: messages.value.map(m => ({ role: m.role, content: m.content })),
-          max_tokens: 2048,
+          // max_tokens: 2048, // 兼容性：默认不传 max_tokens
         }),
       });
 
@@ -69,7 +69,7 @@ async function sendMessage() {
         apiKey: aiConfig.apiKey.value,
         model: aiConfig.model.value,
         messages: messages.value.map(m => ({ role: m.role, content: m.content })),
-        maxTokens: 2048,
+        // maxTokens: 2048, // 兼容性：默认不传 max_tokens
       });
 
       if (result.success && result.content) {

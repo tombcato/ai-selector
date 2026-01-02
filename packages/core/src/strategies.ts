@@ -7,7 +7,7 @@ export interface ProviderStrategy {
     parseModelsResponse?: (data: any) => Model[];
     // 聊天 (也用于连接测试)
     getChatEndpoint: (baseUrl: string, apiKey: string, model: string) => string;
-    buildChatPayload: (model: string, messages: Array<{ role: string; content: string }>, maxTokens: number) => Record<string, unknown>;
+    buildChatPayload: (model: string, messages: Array<{ role: string; content: string }>, maxTokens?: number) => Record<string, unknown>;
     parseChatResponse: (data: any) => string;
     // Headers
     buildHeaders: (apiKey: string) => Record<string, string>;
@@ -29,7 +29,11 @@ export const defaultParseModelsResponse = (data: any): Model[] => {
                     created: m.created || 0,
                 } as any;
             })
-            .sort((a: any, b: any) => (b.created || 0) - (a.created || 0)); // 最新的排在前面
+            .sort((a: any, b: any) => {
+                const diff = (b.created || 0) - (a.created || 0);
+                if (diff !== 0) return diff;
+                return (b.id || '').localeCompare(a.id || '');
+            }); // 最新的排在前面
     }
     return [];
 };
@@ -42,11 +46,16 @@ const openaiStrategy: ProviderStrategy = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
     }),
-    buildChatPayload: (model, messages, maxTokens) => ({
-        model,
-        messages,
-        max_tokens: maxTokens,
-    }),
+    buildChatPayload: (model, messages, maxTokens) => {
+        const payload: any = {
+            model,
+            messages,
+        };
+        if (maxTokens) {
+            payload.max_completion_tokens = maxTokens;
+        }
+        return payload;
+    },
     parseChatResponse: (data) => {
         return data.choices?.[0]?.message?.content || '';
     },
@@ -60,11 +69,16 @@ const anthropicStrategy: ProviderStrategy = {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
     }),
-    buildChatPayload: (model, messages, maxTokens) => ({
-        model,
-        messages,
-        max_tokens: maxTokens,
-    }),
+    buildChatPayload: (model, messages, maxTokens) => {
+        const payload: any = {
+            model,
+            messages,
+        };
+        if (maxTokens) {
+            payload.max_tokens = maxTokens;
+        }
+        return payload;
+    },
     parseChatResponse: (data) => {
         return data.content?.[0]?.text || '';
     },
@@ -83,10 +97,11 @@ const geminiStrategy: ProviderStrategy = {
             role: m.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: m.content }],
         }));
-        return {
-            contents,
-            generationConfig: { maxOutputTokens: maxTokens },
-        };
+        const payload: any = { contents };
+        if (maxTokens) {
+            payload.generationConfig = { maxOutputTokens: maxTokens };
+        }
+        return payload;
     },
     parseChatResponse: (data) => {
         return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -101,7 +116,7 @@ const geminiStrategy: ProviderStrategy = {
                     name: m.displayName || m.name.replace('models/', ''),
                     created: m.created || 0,
                 }))
-                .sort((a: any, b: any) => (b.created || 0) - (a.created || 0));
+                .sort((a: any, b: any) => (b.id || '').localeCompare(a.id || ''));
         }
         return [];
     },
@@ -122,12 +137,15 @@ const cohereStrategy: ProviderStrategy = {
             role: m.role === 'assistant' ? 'CHATBOT' : 'USER',
             message: m.content,
         }));
-        return {
+        const payload: any = {
             model,
             message: lastMessage.content,
             chat_history: chatHistory,
-            max_tokens: maxTokens,
         };
+        if (maxTokens) {
+            payload.max_tokens = maxTokens;
+        }
+        return payload;
     },
     parseChatResponse: (data) => {
         return data.text || '';
@@ -170,7 +188,7 @@ export interface DirectChatResult {
  * 注意: 这会将 API Key 暴露在浏览器中，仅适用于 Demo/测试场景
  */
 export async function sendDirectChat(options: DirectChatOptions): Promise<DirectChatResult> {
-    const { apiFormat, baseUrl, apiKey, model, messages, maxTokens = 2048 } = options;
+    const { apiFormat, baseUrl, apiKey, model, messages, maxTokens } = options;
     const strategy = getStrategy(apiFormat);
 
     const endpoint = strategy.getChatEndpoint(baseUrl, apiKey, model);
@@ -240,7 +258,7 @@ export async function testDirectConnection(options: TestConnectionOptions): Prom
         apiKey: options.apiKey,
         model: options.model,
         messages: [{ role: 'user', content: 'Hi' }],
-        maxTokens: 5, // 最小 token 数，节省成本
+        // maxTokens: 5, // 不设置 maxTokens 以兼容 o1 等不支持该参数的模型
     });
 
     return {

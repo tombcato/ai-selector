@@ -202,7 +202,7 @@ function ChatDemo({ proxyUrl }: { proxyUrl?: string }) {
                         base_url: aiConfig.config.baseUrl,
                         api_format: aiConfig.provider?.apiFormat || 'openai',
                         messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-                        max_tokens: 2048,
+                        // max_tokens: 2048, // 兼容性：默认不传 max_tokens
                     }),
                 })
 
@@ -221,7 +221,7 @@ function ChatDemo({ proxyUrl }: { proxyUrl?: string }) {
                     apiKey: aiConfig.apiKey,
                     model: aiConfig.model,
                     messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-                    maxTokens: 2048,
+                    // maxTokens: 2048, // 兼容性：默认不传 max_tokens
                 })
 
                 if (result.success && result.content) {

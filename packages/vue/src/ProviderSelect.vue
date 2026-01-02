@@ -79,7 +79,7 @@ function handleSelect(id: string) {
             <img :src="p.icon" :alt="p.name" class="apmsu-provider-icon" />
             <span class="font-medium whitespace-nowrap">{{ p.name }}</span>
           </div>
-          <span class="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0">
+          <span class="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
             {{ p.baseUrl.replace('https://', '') }}
           </span>
         </button>

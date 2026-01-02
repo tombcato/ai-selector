@@ -15,7 +15,7 @@ FastAPI 代理服务，解决浏览器 CORS 限制。
     uvicorn server:app --reload --port 8000
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -53,7 +53,7 @@ app.add_middleware(
 # 核心逻辑
 # ============================================================================
 
-async def send_chat_request(api_format: str, base_url: str, api_key: str, model: str, messages: List[Dict[str, str]], max_tokens: int):
+async def send_chat_request(api_format: str, base_url: str, api_key: str, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]):
     """发送聊天请求"""
     strategy = get_strategy(api_format)
     async with httpx.AsyncClient(timeout=TIMEOUT_CHAT) as client:
@@ -89,7 +89,7 @@ async def test_connection(req: ChatRequest):
     """测试连通性"""
     start = time.time()
     try:
-        await send_chat_request(req.api_format, req.base_url, req.api_key, req.model, [{"role": "user", "content": "Hi"}], 5)
+        await send_chat_request(req.api_format, req.base_url, req.api_key, req.model, [{"role": "user", "content": "Hi"}], None)
         return TestConnectionResponse(success=True, latency_ms=int((time.time() - start) * 1000), message="连接成功")
     except Exception as e:
         return TestConnectionResponse(success=False, latency_ms=0, message=format_error(e))
@@ -126,7 +126,7 @@ async def fetch_models(req: FetchModelsRequest):
             # 按创建时间倒序排列（新的在前）
             models_sorted = sorted(
                 models,
-                key=lambda m: m.get('created', 0) if isinstance(m, dict) else 0,
+                key=lambda m: (m.get('created', 0) if isinstance(m, dict) else 0, m.get('id', '')),
                 reverse=True
             )
             

@@ -80,7 +80,7 @@ export function ProviderSelect({
                                 />
                                 <span className="font-medium whitespace-nowrap">{p.name}</span>
                             </div>
-                            <span className="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0">
+                            <span className="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
                                 {p.baseUrl.replace('https://', '')}
                             </span>
                         </button>

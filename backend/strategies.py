@@ -32,7 +32,7 @@ class ChatStrategy(ABC):
         pass
     
     @abstractmethod
-    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: int) -> Dict[str, Any]:
+    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
         """构建聊天请求体"""
         pass
     
@@ -81,7 +81,7 @@ class ChatStrategy(ABC):
         api_key: str,
         model: str,
         messages: List[Dict[str, str]],
-        max_tokens: int,
+        max_tokens: Optional[int],
     ) -> ChatResult:
         """执行聊天请求 (模板方法)"""
         headers = self.build_headers(api_key)
@@ -121,8 +121,11 @@ class OpenAIStrategy(ChatStrategy):
     def build_endpoint(self, base_url: str, model: str, api_key: str) -> str:
         return f"{base_url}/chat/completions"
     
-    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: int) -> Dict[str, Any]:
-        return {"model": model, "messages": messages, "max_tokens": max_tokens}
+    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
+        payload = {"model": model, "messages": messages}
+        if max_tokens is not None:
+             payload["max_completion_tokens"] = max_tokens
+        return payload
     
     def parse_response(self, data: Dict[str, Any], model: str) -> ChatResult:
         content = data.get("choices", [{}])[0].get("message", {}).get("content", "") if data.get("choices") else ""
@@ -145,8 +148,11 @@ class AnthropicStrategy(ChatStrategy):
     def build_endpoint(self, base_url: str, model: str, api_key: str) -> str:
         return f"{base_url}/messages"
     
-    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: int) -> Dict[str, Any]:
-        return {"model": model, "messages": messages, "max_tokens": max_tokens}
+    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
+        payload = {"model": model, "messages": messages}
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
+        return payload
     
     def parse_response(self, data: Dict[str, Any], model: str) -> ChatResult:
         content = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
@@ -167,9 +173,12 @@ class GeminiStrategy(ChatStrategy):
     def build_endpoint(self, base_url: str, model: str, api_key: str) -> str:
         return f"{base_url}/models/{model}:generateContent?key={api_key}"
     
-    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: int) -> Dict[str, Any]:
+    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
         contents = [{"role": "user" if m.get("role") == "user" else "model", "parts": [{"text": m.get("content", "")}]} for m in messages]
-        return {"contents": contents, "generationConfig": {"maxOutputTokens": max_tokens}}
+        payload = {"contents": contents}
+        if max_tokens is not None:
+            payload["generationConfig"] = {"maxOutputTokens": max_tokens}
+        return payload
     
     def parse_response(self, data: Dict[str, Any], model: str) -> ChatResult:
         content = "".join(p.get("text", "") for p in data.get("candidates", [{}])[0].get("content", {}).get("parts", []))
@@ -194,8 +203,11 @@ class CohereStrategy(ChatStrategy):
     def build_endpoint(self, base_url: str, model: str, api_key: str) -> str:
         return f"{base_url}/chat"
     
-    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: int) -> Dict[str, Any]:
-        return {"model": model, "messages": messages, "max_tokens": max_tokens}
+    def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
+        payload = {"model": model, "messages": messages}
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
+        return payload
     
     def parse_response(self, data: Dict[str, Any], model: str) -> ChatResult:
         content = "".join(b.get("text", "") for b in data.get("message", {}).get("content", []))

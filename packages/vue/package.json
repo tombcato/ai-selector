@@ -1,6 +1,6 @@
 {
     "name": "@tombcato/ai-selector-vue",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Vue adapter for AI Provider Selector",
     "type": "module",
     "main": "./dist/index.js",

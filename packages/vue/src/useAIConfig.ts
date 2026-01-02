@@ -38,7 +38,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     const allProviders = computed(() => resolvedConfig.value.providers);
 
     const provider = computed(() =>
-        allProviders.value.find(p => p.id === providerId.value) || null
+        allProviders.value.find((p: any) => p.id === providerId.value) || null
     );
 
     const storage = createConfigStorage(undefined, {
@@ -54,7 +54,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         const saved = storage.load();
         if (saved) {
             // Only load if provider exists in current config
-            if (saved.providerId && allProviders.value.some(p => p.id === saved.providerId)) {
+            if (saved.providerId && allProviders.value.some((p: any) => p.id === saved.providerId)) {
                 providerId.value = saved.providerId;
                 if (saved.apiKey) apiKey.value = saved.apiKey;
                 if (saved.model) model.value = saved.model;
@@ -211,7 +211,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
     }
 
     function save() {
-        const foundModel = models.value.find(m => m.id === model.value);
+        const foundModel = models.value.find((m: Model) => m.id === model.value);
         const nameToSave = foundModel?.name || modelName.value || model.value;
 
         if (foundModel?.name && foundModel.name !== modelName.value) {
@@ -243,7 +243,7 @@ export function useAIConfig(options: UseAIConfigOptions = {}) {
         if (name) {
             modelName.value = name;
         } else {
-            const found = models.value.find(m => m.id === modelId);
+            const found = models.value.find((m: Model) => m.id === modelId);
             modelName.value = found?.name || modelId;
         }
     }

@@ -42,10 +42,18 @@ const openaiStrategy: ProviderStrategy = {
     format: 'openai',
     getModelsEndpoint: (baseUrl) => `${baseUrl}/models`,
     getChatEndpoint: (baseUrl) => `${baseUrl}/chat/completions`,
-    buildHeaders: (apiKey) => ({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-    }),
+    buildHeaders: (apiKey) => {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        };
+        // OpenRouter compatibility & Best Practices
+        if (typeof window !== 'undefined' && window.location) {
+            headers['HTTP-Referer'] = window.location.origin;
+            headers['X-Title'] = document.title || 'AI Selector';
+        }
+        return headers;
+    },
     buildChatPayload: (model, messages, maxTokens) => {
         const payload: any = {
             model,

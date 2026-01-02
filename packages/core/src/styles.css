@@ -61,6 +61,8 @@
     .apmsu-dropdown {
         @apply absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl;
         border-width: 1px;
+        /* Hack to fix rendering glitch where dropdown content is white/hidden until scroll */
+        transform: translateZ(0);
 
         /* 动画初始状态 */
         max-height: 0;

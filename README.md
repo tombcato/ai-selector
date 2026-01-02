@@ -136,11 +136,11 @@
 ```tsx
 // React
 import { AIConfigForm } from '@tombcato/ai-selector-react';
-import '@tombcato/ai-selector-react/dist/index.css'; // ⚠️ 务必引入样式
+import '@tombcato/ai-selector-react/style.css'; // ⚠️ 务必引入样式
 
 // Vue
 import { AIConfigForm } from '@tombcato/ai-selector-vue';
-import '@tombcato/ai-selector-vue/dist/index.css'; // ⚠️ 务必引入样式
+import '@tombcato/ai-selector-vue/style.css'; // ⚠️ 务必引入样式
 
 <AIConfigForm
   proxyUrl=""                 // 空字符串表示直连模式，或填入后端代理地址
@@ -316,6 +316,21 @@ npm install @tombcato/ai-selector-core
 # Optional: Framework Adapters
 npm install @tombcato/ai-selector-react
 npm install @tombcato/ai-selector-vue
+```
+
+### 1.1 CDN 使用（可选）
+
+```html
+<!-- Vue (UMD) -->
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tombcato/ai-selector-vue/dist/index.umd.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/@tombcato/ai-selector-vue/dist/index.css" rel="stylesheet">
+
+<!-- React (UMD) -->
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tombcato/ai-selector-react/dist/index.umd.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/@tombcato/ai-selector-react/dist/index.css" rel="stylesheet">
 ```
 
 ### 2. 本地调试（可选）

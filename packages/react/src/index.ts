@@ -3,6 +3,9 @@
  * React adapter for AI Provider Selector
  */
 
+// Import core styles (will be processed by Tailwind during build)
+import '../../core/src/styles.css';
+
 // Hook
 export { useAIConfig, type UseAIConfigOptions } from './useAIConfig';
 

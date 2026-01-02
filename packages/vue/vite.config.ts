@@ -4,18 +4,24 @@ import { resolve } from 'path';
 
 export default defineConfig({
     plugins: [vue()],
+    css: {
+        postcss: './postcss.config.js',
+    },
     build: {
         lib: {
             entry: resolve(__dirname, 'src/index.ts'),
             name: 'AISelectorVue',
-            fileName: 'index'
+            fileName: (format) => format === 'umd' ? 'index.umd.js' : 'index.js',
+            formats: ['es', 'umd'],
+            cssFileName: 'index',
         },
+        cssCodeSplit: false,
         rollupOptions: {
-            external: ['vue', '@ai-selector/core', '@tombcato/smart-ticker'],
+            external: ['vue', '@tombcato/ai-selector-core', '@tombcato/smart-ticker'],
             output: {
                 globals: {
                     vue: 'Vue',
-                    '@ai-selector/core': 'AISelectorCore'
+                    '@tombcato/ai-selector-core': 'AISelectorCore'
                 }
             }
         },

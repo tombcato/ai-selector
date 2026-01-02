@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import type { Provider, Language } from '@tombcato/ai-selector-core';
 import { I18N } from '@tombcato/ai-selector-core';
 import { SmartText } from './SmartText';
@@ -24,6 +24,21 @@ export function ProviderSelect({
 }: ProviderSelectProps) {
     const t = I18N[language];
     const triggerRef = useRef<HTMLDivElement>(null);
+    const [isNarrow, setIsNarrow] = useState(false);
+
+    useEffect(() => {
+        if (!triggerRef.current) return;
+
+        const observer = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                // If container is narrower than ~350px, hide the URL
+                setIsNarrow(entry.contentRect.width < 350);
+            }
+        });
+        observer.observe(triggerRef.current);
+        return () => observer.disconnect();
+    }, []);
+
     const selectedProvider = providers.find(p => p.id === selectedProviderId);
 
     useEffect(() => {
@@ -80,9 +95,11 @@ export function ProviderSelect({
                                 />
                                 <span className="font-medium whitespace-nowrap">{p.name}</span>
                             </div>
-                            <span className="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
-                                {p.baseUrl.replace('https://', '')}
-                            </span>
+                            {!isNarrow && (
+                                <span className="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
+                                    {p.baseUrl.replace('https://', '')}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </div>

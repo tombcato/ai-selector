@@ -41,7 +41,7 @@ export function ModelSelect({
         if (isOpen && searchInputRef.current) {
             setTimeout(() => {
                 searchInputRef.current?.focus();
-            }, 50);
+            }, 200);
         }
     }, [isOpen]);
 

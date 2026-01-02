@@ -1,6 +1,6 @@
 {
     "name": "@tombcato/ai-selector-core",
-    "version": "0.1.5",
+    "version": "0.1.7",
     "description": "Framework-agnostic AI Provider Selector core utilities",
     "type": "module",
     "main": "./dist/index.js",

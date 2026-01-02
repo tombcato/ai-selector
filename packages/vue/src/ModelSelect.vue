@@ -37,7 +37,7 @@ watch(isOpen, async (val) => {
     // Small delay to ensure transition doesn't interfere with focus
     setTimeout(() => {
       searchInputRef.value?.focus();
-    }, 50);
+    }, 200);
   }
 });
 

@@ -20,7 +20,9 @@ const emit = defineEmits<{
 }>();
 
 const isOpen = ref(false);
+const isNarrow = ref(false);
 const triggerRef = ref<HTMLDivElement | null>(null);
+let resizeObserver: ResizeObserver | null = null;
 const t = computed(() => I18N[props.language]);
 const selectedProvider = computed(() => props.providers.find(p => p.id === props.selectedProviderId));
 
@@ -32,10 +34,20 @@ function handleClickOutside(e: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
+  
+  if (triggerRef.value) {
+    resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        isNarrow.value = entry.contentRect.width < 350;
+      }
+    });
+    resizeObserver.observe(triggerRef.value);
+  }
 });
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside);
+  resizeObserver?.disconnect();
 });
 
 function handleSelect(id: string) {
@@ -79,7 +91,7 @@ function handleSelect(id: string) {
             <img :src="p.icon" :alt="p.name" class="apmsu-provider-icon" />
             <span class="font-medium whitespace-nowrap">{{ p.name }}</span>
           </div>
-          <span class="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
+          <span v-if="!isNarrow" class="apmsu-hint-text ml-auto text-right truncate flex-1 min-w-0 apmsu-provider-baseurl">
             {{ p.baseUrl.replace('https://', '') }}
           </span>
         </button>

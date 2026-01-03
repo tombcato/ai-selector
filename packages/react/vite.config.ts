@@ -17,7 +17,15 @@ export default defineConfig({
         },
         cssCodeSplit: false,
         rollupOptions: {
-            external: ['react', 'react-dom', '@tombcato/ai-selector-core', '@tombcato/smart-ticker'],
+            external: [
+                'react',
+                'react-dom',
+                'react/jsx-runtime',
+                'react/jsx-dev-runtime',
+                '@tombcato/ai-selector-core',
+                '@tombcato/smart-ticker',
+                '@tombcato/smart-ticker/react'
+            ],
             output: {
                 globals: {
                     react: 'React',

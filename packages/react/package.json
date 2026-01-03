@@ -1,6 +1,6 @@
 {
     "name": "@tombcato/ai-selector-react",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "description": "React adapter for AI Provider Selector",
     "type": "module",
     "main": "./dist/index.js",
@@ -11,7 +11,7 @@
         "react-dom": ">=18.0.0"
     },
     "dependencies": {
-        "@tombcato/ai-selector-core": "^0.1.10",
+        "@tombcato/ai-selector-core": "^0.1.11",
         "@tombcato/smart-ticker": "^1.0.4"
     },
     "exports": {

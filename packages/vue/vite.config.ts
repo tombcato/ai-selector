@@ -17,7 +17,12 @@ export default defineConfig({
         },
         cssCodeSplit: false,
         rollupOptions: {
-            external: ['vue', '@tombcato/ai-selector-core', '@tombcato/smart-ticker'],
+            external: [
+                'vue',
+                '@tombcato/ai-selector-core',
+                '@tombcato/smart-ticker',
+                '@tombcato/smart-ticker/vue'
+            ],
             output: {
                 globals: {
                     vue: 'Vue',

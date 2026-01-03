@@ -1,6 +1,6 @@
 {
     "name": "@tombcato/ai-selector-vue",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "description": "Vue adapter for AI Provider Selector",
     "type": "module",
     "main": "./dist/index.js",
@@ -10,7 +10,7 @@
         "vue": "^3.0.0"
     },
     "dependencies": {
-        "@tombcato/ai-selector-core": "^0.1.10",
+        "@tombcato/ai-selector-core": "^0.1.11",
         "@tombcato/smart-ticker": "^1.0.4"
     },
     "exports": {

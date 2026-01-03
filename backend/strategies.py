@@ -66,7 +66,7 @@ class ChatStrategy(ABC):
             model_id = m.get("id")
             if model_id:
                 # 优先取 name，取不到则将 id 格式化作为 name
-                name = m.get("name") or model_id.split("/")[-1].replace("-", " ").replace("_", " ").title()
+                name = m.get("name") or m.get("display_name") or model_id.split("/")[-1].replace("-", " ").replace("_", " ").title()
                 models.append({
                     "id": model_id,
                     "name": name,
@@ -139,8 +139,8 @@ class OpenAIStrategy(ChatStrategy):
 class AnthropicStrategy(ChatStrategy):
     """Anthropic Claude 格式"""
     
-    # Anthropic 不提供 /models 端点
-    supports_models_api = False
+    # Anthropic 支持 /models 端点
+    supports_models_api = True
     
     def build_headers(self, api_key: str) -> Dict[str, str]:
         return {"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"}
@@ -149,9 +149,7 @@ class AnthropicStrategy(ChatStrategy):
         return f"{base_url}/messages"
     
     def build_payload(self, model: str, messages: List[Dict[str, str]], max_tokens: Optional[int]) -> Dict[str, Any]:
-        payload = {"model": model, "messages": messages}
-        if max_tokens is not None:
-            payload["max_tokens"] = max_tokens
+        payload = {"model": model, "messages": messages, "max_tokens": max_tokens or 1024}
         return payload
     
     def parse_response(self, data: Dict[str, Any], model: str) -> ChatResult:
@@ -162,6 +160,11 @@ class AnthropicStrategy(ChatStrategy):
             raw_response=data, content=content, model=data.get("model", model),
             usage={"prompt_tokens": inp, "completion_tokens": out, "total_tokens": inp + out}
         )
+    
+    def build_models_request(self, base_url: str, api_key: str) -> Tuple[str, Dict[str, str]]:
+        return (f"{base_url}/models", self.build_headers(api_key))
+    
+   
 
 
 class GeminiStrategy(ChatStrategy):

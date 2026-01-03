@@ -51,7 +51,10 @@ export {
 
 // Storage
 export {
-    localStorageAdapter,
+    encryptedStorageAdapter,
+    plainStorageAdapter,
+    defaultStorageAdapter,
+    localStorageAdapter, // deprecated
     createConfigStorage
 } from './storage';
 

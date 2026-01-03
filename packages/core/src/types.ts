@@ -102,18 +102,6 @@ export interface StorageAdapter {
 
 // ============ Provider Config Types ============
 
-/** 自定义 Provider 定义 */
-export interface CustomProviderDefinition {
-    name: string;
-    baseUrl: string;
-    needsApiKey: boolean;
-    apiFormat: ApiFormat;
-    supportsModelsApi?: boolean;
-    icon?: string;
-    /** 静态模型列表（当不支持 /models API 时使用） */
-    models?: Model[];
-}
-
 /** Provider 配置 JSON */
 export interface ProviderConfig {
     /** 模式：default=内置+自定义，customOnly=只用自定义 */

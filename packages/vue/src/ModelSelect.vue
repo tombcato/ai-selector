@@ -140,7 +140,7 @@ function handleSelect(id: string, name?: string) {
       </p>
       
       <p v-else-if="fetchModelError" class="apmsu-hint-text dark:text-zinc-500">
-        {{ (t as any)[fetchModelError] || fetchModelError }}
+        {{ fetchModelError === 'fetchModelsFailed' ? t.fetchModelsFailed : fetchModelError }}
       </p>
 
       <p v-else-if="provider?.needsApiKey && !hasApiKey" class="apmsu-hint-text">

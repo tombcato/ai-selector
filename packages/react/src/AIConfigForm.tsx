@@ -158,7 +158,7 @@ export function AIConfigForm({
                     <div className="flex gap-2">
                         <button
                             onClick={() => runTest()}
-                            disabled={!providerId || !apiKey || !model || disabled || testStatus === 'testing'}
+                            disabled={!providerId || (provider?.needsApiKey && !apiKey) || !model || disabled || testStatus === 'testing'}
                             className={`apmsu-btn flex-1 ${testStatus === 'success' ? 'apmsu-btn-success' :
                                 testStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40' :
                                     'apmsu-btn-ghost border border-gray-200 dark:border-zinc-700'

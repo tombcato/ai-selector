@@ -165,7 +165,7 @@ function updateBaseUrl(val: string) {
           <button
             type="button"
             @click="runTest()"
-            :disabled="!providerId || !apiKey || !model || disabled || testStatus === 'testing'"
+            :disabled="!providerId || (provider?.needsApiKey && !apiKey) || !model || disabled || testStatus === 'testing'"
             :class="['apmsu-btn flex-1', 
               testStatus === 'success' ? 'apmsu-btn-success' : 
               testStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40' : 

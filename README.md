@@ -44,6 +44,20 @@
 
 ---
 
+## 📑 目录
+
+- [演示预览](#-演示预览)
+- [核心特性](#-核心特性)
+- [支持的 AI 厂商](#-支持的-ai-厂商-20)
+- [快速开始](#-快速开始)
+- [AIConfigForm 参数详解](#-核心组件-aiconfigform-参数详解)
+- [useAIConfig Hook (Headless 模式)](#-headless-模式-useaiconfig-hook)
+- [加密存储](#-加密存储)
+- [项目结构](#-项目结构)
+- [更新日志](./CHANGELOG.md)
+
+---
+
 ## 📸 演示预览
 本项目 UI 中的文本滚动动效由 **[Smart Ticker](https://github.com/tombcato/smart-ticker)** 提供支持。
 <div align="center">
@@ -74,7 +88,7 @@
 | 图标 | 厂商 | ID | API 格式 | 需要 Key | Models API |
 |:----:|------|----|---------:|:--------:|:----------:|
 | <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/openai.svg" width="20"> | **OpenAI** | `openai` | OpenAI | ✅ | ✅ |
-| <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/anthropic.svg" width="20"> | **Anthropic (Claude)** | `anthropic` | Anthropic | ✅ | ❌ |
+| <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/anthropic.svg" width="20"> | **Anthropic (Claude)** | `anthropic` | Anthropic | ✅ | ✅ |
 | <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/gemini.svg" width="20"> | **Google Gemini** | `gemini` | Gemini | ✅ | ✅ |
 | <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/openrouter.svg" width="20"> | **OpenRouter** | `openrouter` | OpenAI | ✅ | ✅ |
 | <img src="https://registry.npmmirror.com/@lobehub/icons-static-svg/1.77.0/files/icons/deepseek.svg" width="20"> | **DeepSeek** | `deepseek` | OpenAI | ✅ | ✅ |
@@ -108,7 +122,7 @@
 
 | 参数名 | 类型 | 可选 | 默认值 | 描述 |
 |--------|------|:---:|--------|------|
-| `proxyUrl` | `string` | ❌ | `''` | 代理地址，留空则使用直连模式 (必传) |
+| `proxyUrl` | `string` | ✅ | - | 代理地址，留空则使用直连模式 |
 | `title` | `string` | ✅ | - | 表单标题 |
 | `language` | `'zh' \| 'en'` | ✅ | `'zh'` | 界面语言 |
 | `showPreview` | `boolean` | ✅ | `false` | 显示配置预览 |
@@ -227,8 +241,7 @@ const providerConfig: ProviderConfig = {
 - ✅ 零配置，开箱即用
 - ✅ 无需部署后端
 - ⚠️ API Key 会暴露在浏览器 Network 中
-- ⚠️ 部分厂商可能不支持浏览器 CORS
-- ⚠️ 部分厂商可能不支持浏览器 CORS
+- ⚠️ 部分厂商可能不支持浏览器跨域请求，导致接口失败
 
 
 
@@ -249,12 +262,13 @@ import ...
 - ✅ 隐藏 API Key
 - ✅ 绕过 CORS 限制
 - ✅ 前后端架构分离
-- 📦 需要部署 `backend/server.py`
+- 📦 需要部署 `backend/server.py`,或把相关逻辑集成到你自己的后端服务中，server.py实现三个api：/test /models /chat
 ```tsx
 import ...
 <AIConfigForm
   proxyUrl="后端代理地址" //backend server.py本地代理为http://localhost:8000
 />
+
 ```
 **推荐使用代理的场景：**
 - 生产环境部署
@@ -283,26 +297,6 @@ import ...
 - 💻 需要开发者实现
 
 
-
----
-## 🖥️ 前后端职责
-
-### 前端 (React / Vue)
-
-| 职责 | 说明 |
-|------|------|
-| UI 渲染 | 配置表单、模型选择、状态展示 |
-| 状态管理 | LocalStorage 持久化 |
-| 请求组装 | 根据厂商格式构建请求 |
-| 直连调用 | 默认模式下直接请求 API |
-
-### 后端 (可选)
-
-| 职责 | 说明 |
-|------|------|
-| 请求转发 | 解决 CORS 问题 |
-| 密钥保护 | 隐藏 API Key |
-| 格式转换 | 统一不同厂商接口 |
 
 ---
 
@@ -357,7 +351,109 @@ VITE_PROXY_URL=http://localhost:8000
 
 ---
 
-## 📁 项目结构
+## 🔧 Headless 模式 (useAIConfig Hook)
+
+如果你不需要内置 UI，只想使用配置逻辑，可以直接使用 `useAIConfig` Hook：
+
+### React
+
+```tsx
+import { useAIConfig } from '@tombcato/ai-selector-react';
+
+function MyCustomUI() {
+    const {
+        // 状态
+        providerId,          // 当前选中的 Provider ID
+        apiKey,              // API Key
+        model,               // 当前选中的 Model ID
+        modelName,           // Model 显示名称
+        baseUrl,             // 自定义 Base URL
+        models,              // 可用模型列表
+        provider,            // 当前 Provider 对象
+        providers,           // 所有可用 Providers
+        isValid,             // 配置是否完整有效
+        testStatus,          // 测试状态: 'idle' | 'testing' | 'success' | 'error'
+        testResult,          // 测试结果对象
+        isFetchingModels,    // 是否正在获取模型列表
+        fetchModelError,     // 获取模型错误信息
+        config,              // 完整配置对象
+        
+        // 方法
+        setProviderId,       // 设置 Provider
+        setApiKey,           // 设置 API Key
+        selectModel,         // 选择 Model (id, name)
+        setBaseUrl,          // 设置 Base URL
+        runTest,             // 执行连接测试
+        save,                // 保存配置到 Storage
+    } = useAIConfig({
+        proxyUrl: '',                    // 可选：代理地址
+        providerConfig: {},              // 可选：Provider 配置
+        initialConfig: {},               // 可选：初始配置
+        onSerialize: (data) => data,     // 可选：序列化钩子
+        onDeserialize: (data) => data,   // 可选：反序列化钩子
+        modelFetcher: async () => [],    // 可选：自定义模型获取
+    });
+
+    // 使用这些状态和方法构建你自己的 UI
+    return (
+        <div>
+            <select value={providerId} onChange={e => setProviderId(e.target.value)}>
+                {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            {/* ... 你的自定义 UI */}
+        </div>
+    );
+}
+```
+
+### Vue
+
+```vue
+<script setup lang="ts">
+import { useAIConfig } from '@tombcato/ai-selector-vue';
+
+const {
+    providerId, apiKey, model, models, providers, isValid,
+    setProviderId, setApiKey, selectModel, runTest, save
+} = useAIConfig({ proxyUrl: '' });
+</script>
+
+<template>
+    <!-- 你的自定义 UI -->
+</template>
+```
+
+---
+
+## 加密存储API Key
+
+配置默认使用 **AES 加密**存储到 localStorage，防止 API Key 明文泄露。
+
+```typescript
+import { 
+    createConfigStorage, 
+    encryptedStorageAdapter,  // 默认，AES 加密
+    plainStorageAdapter       // 明文（不推荐）
+} from '@tombcato/ai-selector-core';
+
+// 默认使用加密
+const storage = createConfigStorage();
+
+// 使用明文（不推荐）
+const plainStorage = createConfigStorage(plainStorageAdapter);
+
+// 自定义序列化
+const customStorage = createConfigStorage(encryptedStorageAdapter, {
+    serialize: (data) => JSON.stringify(data),
+    deserialize: (data) => JSON.parse(data),
+});
+```
+
+> ⚠️ 加密密钥默认为 `'aiselector'`，适合防止普通用户直接查看，不适用于高安全场景。
+
+---
+
+## �📁 项目结构
 
 ```
 ai-provider-selector/

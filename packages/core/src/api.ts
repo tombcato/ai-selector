@@ -136,7 +136,11 @@ export async function fetchModels(options: FetchModelsOptions): Promise<Model[]>
                     const parser = strategy.parseModelsResponse || defaultParseModelsResponse;
                     return parser(data);
                 } else {
-                    if (!fallbackToStatic) throw new Error(`HTTP ${response.status}`);
+                    // 解析响应体获取详细错误信息
+                    const body = await response.json().catch(() => ({}));
+                    const errorMsg = body.error?.message || `HTTP ${response.status}`;
+                    console.warn('Model fetch failed:', errorMsg);
+                    if (!fallbackToStatic) throw new Error(errorMsg);
                 }
             }
         } catch (e) {

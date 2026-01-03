@@ -19,7 +19,7 @@ export const defaultParseModelsResponse = (data: any): Model[] => {
             .filter((m: any) => m.id)
             .map((m: any) => {
                 const name =
-                    m.name ||
+                    m.name || m.display_name ||
                     (m.id.split('/').pop() ?? '')
                         .replace(/[-_]/g, ' ')
                         .replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -71,24 +71,38 @@ const openaiStrategy: ProviderStrategy = {
 
 const anthropicStrategy: ProviderStrategy = {
     format: 'anthropic',
+    getModelsEndpoint: (baseUrl) => `${baseUrl}/models`,
     getChatEndpoint: (baseUrl) => `${baseUrl}/messages`,
     buildHeaders: (apiKey) => ({
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',  // 启用浏览器直连 CORS
     }),
     buildChatPayload: (model, messages, maxTokens) => {
         const payload: any = {
             model,
             messages,
+            max_tokens: maxTokens || 1024,  // Anthropic API 强制要求 max_tokens
         };
-        if (maxTokens) {
-            payload.max_tokens = maxTokens;
-        }
         return payload;
     },
     parseChatResponse: (data) => {
         return data.content?.[0]?.text || '';
+    },
+    // Anthropic 返回: { data: [{ id, display_name, created_at }] }
+    parseModelsResponse: (data) => {
+        if (Array.isArray(data.data)) {
+            return data.data
+                .filter((m: any) => m.id)
+                .map((m: any) => ({
+                    id: m.id,
+                    name: m.display_name || m.id,
+                    created: m.created_at ? new Date(m.created_at).getTime() / 1000 : 0,
+                }))
+                .sort((a: any, b: any) => (b.created || 0) - (a.created || 0));
+        }
+        return [];
     },
 };
 
@@ -139,16 +153,10 @@ const cohereStrategy: ProviderStrategy = {
         'Authorization': `Bearer ${apiKey}`,
     }),
     buildChatPayload: (model, messages, maxTokens) => {
-        // Cohere 使用不同的格式: message 是当前消息, chat_history 是历史
-        const lastMessage = messages[messages.length - 1];
-        const chatHistory = messages.slice(0, -1).map(m => ({
-            role: m.role === 'assistant' ? 'CHATBOT' : 'USER',
-            message: m.content,
-        }));
+        // Cohere v2 API 使用 messages 格式
         const payload: any = {
             model,
-            message: lastMessage.content,
-            chat_history: chatHistory,
+            messages,
         };
         if (maxTokens) {
             payload.max_tokens = maxTokens;
@@ -156,7 +164,8 @@ const cohereStrategy: ProviderStrategy = {
         return payload;
     },
     parseChatResponse: (data) => {
-        return data.text || '';
+        // Cohere v2 响应格式
+        return data.message?.content?.[0]?.text || '';
     },
 };
 

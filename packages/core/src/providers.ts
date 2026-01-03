@@ -49,7 +49,7 @@ export const PROVIDERS: Record<string, Provider> = {
         baseUrl: 'https://api.anthropic.com/v1',
         needsApiKey: true,
         apiFormat: 'anthropic',
-        supportsModelsApi: false,
+        supportsModelsApi: true,
         icon: `${ICON_CDN_BASE}/anthropic.svg`,
     },
     [PROVIDER_ID.GEMINI]: {

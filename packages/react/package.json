@@ -1,6 +1,6 @@
 {
     "name": "@tombcato/ai-selector-react",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "React adapter for AI Provider Selector",
     "type": "module",
     "main": "./dist/index.js",

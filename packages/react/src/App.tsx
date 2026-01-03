@@ -130,6 +130,12 @@ function App() {
                     </div>
                 </header>
 
+                {/* 连接模式显示 */}
+                <div className={`px-3 py-2 text-xs rounded-md flex items-center gap-1 ${PROXY_URL ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800'}`}>
+                    <span>{PROXY_URL ? '🛡️ 后端代理模式' : '🔗 前端直连模式（注意：部分AI厂商不支持直连跨域）'}</span>
+                    {PROXY_URL && <span className="opacity-60 truncate">{PROXY_URL}</span>}
+                </div>
+
                 <AIConfigForm
                     language={lang}
                     proxyUrl={PROXY_URL}

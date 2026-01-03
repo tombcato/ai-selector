@@ -1,8 +1,11 @@
 <div align="center">
   <img src="./logo.svg" width="128" alt="AI Selector Logo" />
   <h1>AI Selector</h1>
-  <p><strong>如果你开发的应用/服务需要用户提供 AI 配置，试试使用 AI Selector 通用 AI 配置开发组件， 简单快速接入 AI </strong></p>
-  <p>开箱即用，内置 20+ 主流 AI 厂商配置可自定义扩展、模型列表智能管理、API Key 安全存储、连通性测试和配置持久化。为 React 和 Vue 提供一致的 AI 服务接入体验</p>
+  <p>
+    <a href="./README.md">简体中文</a> | <a href="./README.en.md">English</a>
+  </p>
+  <p><strong>如果你开发的应用/服务需要用户提供 AI 配置，试试 AI Selector 聚合配置和连接处理， 开箱即用，为 React 和 Vue 提供一致的 AI 服务接入体验 </strong></p>
+  <!-- <p>开箱即用，内置 20+ 主流 AI 厂商配置可自定义扩展、模型列表智能管理、API Key 安全存储、连通性测试和配置持久化。为 React 和 Vue 提供一致的 AI 服务接入体验</p> -->
 
   <!-- GitHub Badges -->
   <p>
@@ -72,18 +75,19 @@
 
 | 特性 | 描述 |
 |------|------|
-| 🤖 **20+ 厂商支持** | OpenAI, Claude, Gemini, DeepSeek 等 |
-| ⚡ **智能模型发现** | 自动获取厂商最新模型列表 |
-| 📡 **连接诊断** | 内置连通性测试与延迟检测 |
-| 💾 **配置持久化** | 自动保存到 LocalStorage |
-| 🎨 **统一设计系统** | 基于 Tailwind CSS，支持深色模式，中英切换 |
-| 🔌 **多框架支持** | 同时提供 React 和 Vue 适配器 |
+| 🤖 **20+ 厂商** | OpenAI, Claude, Gemini, DeepSeek... 可自定义扩展 |
+| ⚡ **智能模型发现** | 自动获取厂商最新模型列表，无需手动维护 |
+| 📡 **连接诊断** | 一键测试 API 连通性与延迟 |
+| � **AES 加密存储** | API Key 加密保存到 localStorage，非明文 |
+| 🎨 **开箱即用 UI** | Tailwind CSS 设计系统，深色模式，中英双语 |
+| 🔌 **React + Vue** | 双框架适配器，核心逻辑共享 |
+| 🧩 **Headless 模式** | 只用 `useAIConfig` Hook，完全自定义 UI |
+| 🔄 **零后端可选** | 支持前端直连 / 后端代理 / 自定义 fetcher |
 
 ---
 
 ## 🤖 支持的 AI 厂商 (20+)
 
-所有图标均支持深色/浅色主题自动切换。
 
 | 图标 | 厂商 | ID | API 格式 | 需要 Key | Models API |
 |:----:|------|----|---------:|:--------:|:----------:|
@@ -453,7 +457,7 @@ const customStorage = createConfigStorage(encryptedStorageAdapter, {
 
 ---
 
-## �📁 项目结构
+## 📁 项目结构
 
 ```
 ai-provider-selector/

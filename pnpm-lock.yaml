@@ -65,8 +65,8 @@ importers:
   packages/react:
     dependencies:
       '@tombcato/ai-selector-core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.1.11
+        version: 0.1.11
       '@tombcato/smart-ticker':
         specifier: ^1.0.4
         version: 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.26(typescript@5.9.3))
@@ -108,8 +108,8 @@ importers:
   packages/vue:
     dependencies:
       '@tombcato/ai-selector-core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.1.11
+        version: 0.1.11
       '@tombcato/smart-ticker':
         specifier: ^1.0.4
         version: 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.26(typescript@5.9.3))
@@ -639,6 +639,9 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       '@svgr/core': '*'
+
+  '@tombcato/ai-selector-core@0.1.11':
+    resolution: {integrity: sha512-wOMBoWOSIQ+fjlW6rgYWI1WfraMV7xZPsblzhejL+WNQKGE79GnUIsH1AVzytOq6p6m7Qm9FoZzUDUc52yTfgg==}
 
   '@tombcato/smart-ticker@1.0.4':
     resolution: {integrity: sha512-dyNqg5OW6YavRHJcrYMCwDj5i2JQw8AnIC/L+P/sT+OkGsNO+iOpBdBR0Sl9mJreAi5vVcrz2SQJWRhpk/7G2w==}
@@ -1918,6 +1921,10 @@ snapshots:
       svg-parser: 2.0.4
     transitivePeerDependencies:
       - supports-color
+
+  '@tombcato/ai-selector-core@0.1.11':
+    dependencies:
+      crypto-js: 4.2.0
 
   '@tombcato/smart-ticker@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.26(typescript@5.9.3))':
     optionalDependencies:
